@@ -7,17 +7,41 @@
     body {
       font-family: sans-serif;
       background: #f9f9f9;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    h1 {
       text-align: center;
-      padding: 40px;
+      margin-bottom: 10px;
+      font-size: 1.5rem;
+    }
+
+    label {
+      text-align: left;
+      font-weight: bold;
+      font-size: 14px;
     }
 
     input, textarea, select {
-      width: 80%;
-      padding: 10px;
+      width: 100%;
+      padding: 12px;
       font-size: 16px;
       border-radius: 8px;
       border: 1px solid #ccc;
-      margin-bottom: 15px;
+      box-sizing: border-box;
     }
 
     textarea {
@@ -25,66 +49,99 @@
     }
 
     button {
-      padding: 12px 24px;
-      font-size: 15px;
+      padding: 14px;
+      font-size: 16px;
       background-color: #25d366;
       color: white;
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      width: 100%;
+      font-weight: bold;
     }
 
     button:hover {
       background-color: #1ebe57;
     }
 
+    .btn-secondary {
+      background-color: #007bff;
+    }
+
+    .btn-secondary:hover {
+      background-color: #0056b3;
+    }
+
     /* Campos extras escondidos por padrão */
     #bloqueioOutro, #detalhesSubstituicao {
       display: none;
     }
+
+    pre {
+      text-align: left;
+      background: #f5f5f5;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      font-size: 14px;
+    }
+
+    /* Responsividade */
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+      .container {
+        padding: 15px;
+      }
+      h1 {
+        font-size: 1.3rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>Gerar Report Bloqueio</h1>
+  <div class="container">
+    <h1>Gerar Report Bloqueio</h1>
 
-  <label for="numero">Número WhatsApp</label><br>
-  <input type="tel" id="numero" placeholder="+351 912 345 678" inputmode="numeric"><br><br>
-  
-  <label for="encomenda">Número da Encomenda</label><br>
-  <input type="tel" id="encomenda" placeholder="00035625 / 530729" inputmode="numeric"><br><br>
-  
-  <!-- Combo para Tipo de Bloqueio -->
- <select id="bloqueio" onchange="mostrarOutro()">
-    <option value="">-- Selecione o tipo de bloqueio --</option>
-    <option>Erro "encomenda em processamento"</option>
-    <option>O valor do pedido é superior ao valor permitido</option>
-    <option>Erro de duplicidade</option>
-    <option>Erro descohecido</option>
-    <option>Outro (especificar abaixo)</option>
-  </select><br>
-  
-  <!-- Campo só aparece se for "Outro" -->
-  <input type="text" id="bloqueioOutro" placeholder="Digite o tipo de bloqueio"><br>
+    <label for="numero">Número WhatsApp</label>
+    <input type="tel" id="numero" placeholder="+351 912 345 678" inputmode="numeric">
+    
+    <label for="encomenda">Número da Encomenda</label>
+    <input type="tel" id="encomenda" placeholder="00035625 / 530729" inputmode="numeric">
+    
+    <label for="bloqueio">Tipo de Bloqueio</label>
+    <select id="bloqueio" onchange="mostrarOutro()">
+      <option value="">-- Selecione o tipo de bloqueio --</option>
+      <option>Erro "encomenda em processamento"</option>
+      <option>O valor do pedido é superior ao valor permitido</option>
+      <option>Erro de duplicidade</option>
+      <option>Erro descohecido</option>
+      <option>Outro (especificar abaixo)</option>
+    </select>
 
-  <!-- Combo Substituição -->
-  <select id="substituicao" onchange="mostrarDescricaoSubstituicao()">
-    <option value="">-- Houve substituição? --</option>
-    <option>Sim, teve substituição</option>
-    <option>Não teve substituição</option>
-    <option>Não teve substituição mas quero adicionar nota/descrição</option>
-  </select><br>
+    <input type="text" id="bloqueioOutro" placeholder="Digite o tipo de bloqueio">
 
-  <!-- Campo descrição só aparece se for necessário -->
-  <textarea id="detalhesSubstituicao" placeholder="Descreva os artigos substituídos ou a nota adicional..."></textarea><br>
+    <label for="substituicao">Houve substituição?</label>
+    <select id="substituicao" onchange="mostrarDescricaoSubstituicao()">
+      <option value="">-- Selecione --</option>
+      <option>Sim, teve substituição</option>
+      <option>Não teve substituição</option>
+      <option>Não teve substituição mas quero adicionar nota/descrição</option>
+    </select>
 
-  <label for="ticket">Ticket</label><br>
-  <input type="number" id="ticket" placeholder="1832377" inputmode="numeric"><br><br>
+    <textarea id="detalhesSubstituicao" placeholder="Descreva os artigos substituídos ou a nota adicional..."></textarea>
 
-  <button onclick="gerarMensagem()">Gerar Mensagem</button>
-  <button onclick="enviarWhatsApp()">Abrir no WhatsApp</button>
+    <label for="ticket">Ticket</label>
+    <input type="number" id="ticket" placeholder="1832377" inputmode="numeric">
 
-  <h3>Prévia da Mensagem:</h3>
-  <pre id="preview" style="text-align:left; background:#fff; padding:15px; border:1px solid #ccc; border-radius:8px; white-space:pre-wrap;"></pre>
+    <button onclick="gerarMensagem()">Gerar Mensagem</button>
+    <button class="btn-secondary" onclick="enviarWhatsApp()">Abrir no WhatsApp</button>
+
+    <h3>Prévia da Mensagem:</h3>
+    <pre id="preview"></pre>
+  </div>
 
   <script>
     let mensagemGerada = "";
@@ -124,7 +181,6 @@
       const detalhes = document.getElementById("detalhesSubstituicao").value;
       const ticket = document.getElementById("ticket").value;
 
-      // Se escolheu "Outro", usa o texto digitado
       if (bloqueio === "Outro (especificar abaixo)" && bloqueioOutro.trim() !== "") {
         bloqueio = bloqueioOutro;
       }
@@ -158,34 +214,31 @@ Ticket: ${ticket}`;
       window.open(url, "_blank");
     }
 
-      // 📱 Máscara para telefone internacional (+351 912 345 678)
-  document.getElementById("numero").addEventListener("input", function(e) {
-    let valor = e.target.value.replace(/\D/g, ""); // remove tudo que não for número
-    if(valor.startsWith("351")) {
-      valor = "+" + valor.replace(/^351/, "351 "); // adiciona + e espaço
-    } else if(valor.startsWith("55")) {
-      valor = "+" + valor.replace(/^55/, "55 "); // ex. Brasil
-    }
-    valor = valor.replace(/(\+\d{2,3})(\d{3})(\d{3})(\d{3})$/, "$1 $2 $3 $4");
-    e.target.value = valor;
-  });
+    // 📱 Máscara telefone
+    document.getElementById("numero").addEventListener("input", function(e) {
+      let valor = e.target.value.replace(/\D/g, "");
+      if(valor.startsWith("351")) {
+        valor = "+" + valor.replace(/^351/, "351 ");
+      } else if(valor.startsWith("55")) {
+        valor = "+" + valor.replace(/^55/, "55 ");
+      }
+      valor = valor.replace(/(\+\d{2,3})(\d{3})(\d{3})(\d{3})$/, "$1 $2 $3 $4");
+      e.target.value = valor;
+    });
 
-  // 📦 Máscara para encomenda (00035625 / 530729)
-  document.getElementById("encomenda").addEventListener("input", function(e) {
-    let valor = e.target.value.replace(/\D/g, ""); // só números
-    if (valor.length > 8) {
-      valor = valor.slice(0, 8) + " / " + valor.slice(8);
-    }
-    e.target.value = valor;
-  });
+    // 📦 Máscara encomenda
+    document.getElementById("encomenda").addEventListener("input", function(e) {
+      let valor = e.target.value.replace(/\D/g, "");
+      if (valor.length > 8) {
+        valor = valor.slice(0, 8) + " / " + valor.slice(8);
+      }
+      e.target.value = valor;
+    });
 
-  // 🎫 Ticket só números (remove letras automaticamente)
-  document.getElementById("ticket").addEventListener("input", function(e) {
-    e.target.value = e.target.value.replace(/\D/g, ""); 
-  });
+    // 🎫 Ticket só números
+    document.getElementById("ticket").addEventListener("input", function(e) {
+      e.target.value = e.target.value.replace(/\D/g, ""); 
+    });
   </script>
- 
-
-
 </body>
 </html>
