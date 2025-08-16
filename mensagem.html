@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Gerar mensagem para WhatsApp</title>
+  <title>Gerar Report Bloqueio WhatsApp</title>
   <style>
     body {
       font-family: sans-serif;
@@ -11,23 +11,17 @@
       padding: 40px;
     }
 
-    textarea {
+    input, textarea {
       width: 80%;
-      height: 100px;
       padding: 10px;
       font-size: 16px;
       border-radius: 8px;
       border: 1px solid #ccc;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
-    input {
-      width: 250px;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 20px;
+    textarea {
+      height: 100px;
     }
 
     button {
@@ -46,21 +40,54 @@
   </style>
 </head>
 <body>
-  <h1>Gerar mensagem para WhatsApp</h1>
+  <h1>Gerar Report Bloqueio</h1>
 
   <input type="text" id="numero" placeholder="Número com DDI (ex: 351912345678)"><br>
-  <textarea id="mensagem" placeholder="Digite sua mensagem..."></textarea><br>
+  <input type="text" id="encomenda" placeholder="Número da encomenda (ex: 00035625 / 530729)"><br>
+  <input type="text" id="bloqueio" placeholder="Tipo do bloqueio (ex: Erro 'encomenda em processamento')"><br>
+  <input type="text" id="substituicao" placeholder="Substituição (ex: substituição de artigos)"><br>
+  <textarea id="detalhes" placeholder="Detalhes das substituições (ex: Substituição de Bife da Pá...)"></textarea><br>
+  <input type="text" id="ticket" placeholder="Ticket do suporte (ex: 1832377)"><br>
+
+  <button onclick="gerarMensagem()">Gerar Mensagem</button>
   <button onclick="enviarWhatsApp()">Abrir no WhatsApp</button>
 
+  <h3>Prévia da Mensagem:</h3>
+  <pre id="preview" style="text-align:left; background:#fff; padding:15px; border:1px solid #ccc; border-radius:8px; white-space:pre-wrap;"></pre>
+
   <script>
+    let mensagemGerada = "";
+
+    function gerarMensagem() {
+      const encomenda = document.getElementById("encomenda").value;
+      const bloqueio = document.getElementById("bloqueio").value;
+      const substituicao = document.getElementById("substituicao").value;
+      const detalhes = document.getElementById("detalhes").value;
+      const ticket = document.getElementById("ticket").value;
+
+      mensagemGerada = 
+`Report Bloqueio
+
+Encomenda: ${encomenda}
+Tipo do Bloqueio: ${bloqueio}
+Substituição: ${substituicao}
+
+${detalhes}
+
+Já contactado o 2370
+
+Ticket: ${ticket}`;
+
+      document.getElementById("preview").innerText = mensagemGerada;
+    }
+
     function enviarWhatsApp() {
       const numero = document.getElementById("numero").value;
-      const mensagem = document.getElementById("mensagem").value;
-      if (!numero || !mensagem) {
-        alert("Preencha o número e a mensagem!");
+      if (!numero || !mensagemGerada) {
+        alert("Preencha o número e gere a mensagem antes de enviar!");
         return;
       }
-      const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`;
+      const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensagemGerada)}`;
       window.open(url, "_blank");
     }
   </script>
