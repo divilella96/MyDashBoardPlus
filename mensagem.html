@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gerar mensagem para WhatsApp</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f9f9;
+      text-align: center;
+      padding: 40px;
+    }
+
+    textarea {
+      width: 80%;
+      height: 100px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 250px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 15px;
+      background-color: #25d366;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1ebe57;
+    }
+  </style>
+</head>
+<body>
+  <h1>Gerar mensagem para WhatsApp</h1>
+
+  <input type="text" id="numero" placeholder="Número com DDI (ex: 351912345678)"><br>
+  <textarea id="mensagem" placeholder="Digite sua mensagem..."></textarea><br>
+  <button onclick="enviarWhatsApp()">Abrir no WhatsApp</button>
+
+  <script>
+    function enviarWhatsApp() {
+      const numero = document.getElementById("numero").value;
+      const mensagem = document.getElementById("mensagem").value;
+      if (!numero || !mensagem) {
+        alert("Preencha o número e a mensagem!");
+        return;
+      }
+      const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`;
+      window.open(url, "_blank");
+    }
+  </script>
+</body>
+</html>
