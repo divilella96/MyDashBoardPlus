@@ -37,16 +37,21 @@
     button:hover {
       background-color: #1ebe57;
     }
+
+    /* Campo escondido por padrão */
+    #bloqueioOutro {
+      display: none;
+    }
   </style>
 </head>
 <body>
   <h1>Gerar Report Bloqueio</h1>
 
   <input type="text" id="numero" placeholder="Número com DDI (ex: 351912345678)"><br>
-  <input type="text" id="encomenda" placeholder="Número da encomenda (ex: 00012345 / 123456)"><br>
+  <input type="text" id="encomenda" placeholder="Número da encomenda (ex: 00035625 / 530729)"><br>
   
   <!-- Combo para Tipo de Bloqueio -->
-  <select id="bloqueio">
+ <select id="bloqueio">
     <option value="">-- Selecione o tipo de bloqueio --</option>
     <option>Erro "encomenda em processamento"</option>
     <option>O valor do pedido é superior ao valor permitido</option>
@@ -55,8 +60,8 @@
     <option>Outro (especificar abaixo)</option>
   </select><br>
   
-  <!-- Caso seja "Outro", pode escrever manualmente -->
-  <input type="text" id="bloqueioOutro" placeholder="Outro tipo de bloqueio (opcional)"><br>
+  <!-- Campo só aparece se for "Outro" -->
+  <input type="text" id="bloqueioOutro" placeholder="Digite o tipo de bloqueio"><br>
 
   <input type="text" id="substituicao" placeholder="Substituição (ex: substituição de artigos)"><br>
   <textarea id="detalhes" placeholder="Detalhes das substituições (ex: Substituição de Bife da Pá...)"></textarea><br>
@@ -70,6 +75,18 @@
 
   <script>
     let mensagemGerada = "";
+
+    function mostrarOutro() {
+      const select = document.getElementById("bloqueio");
+      const outroCampo = document.getElementById("bloqueioOutro");
+
+      if (select.value === "Outro (especificar abaixo)") {
+        outroCampo.style.display = "block";
+      } else {
+        outroCampo.style.display = "none";
+        outroCampo.value = "";
+      }
+    }
 
     function gerarMensagem() {
       const encomenda = document.getElementById("encomenda").value;
