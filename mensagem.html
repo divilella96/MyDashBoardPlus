@@ -11,7 +11,7 @@
       padding: 40px;
     }
 
-    input, textarea {
+    input, textarea, select {
       width: 80%;
       padding: 10px;
       font-size: 16px;
@@ -44,7 +44,20 @@
 
   <input type="text" id="numero" placeholder="Número com DDI (ex: 351912345678)"><br>
   <input type="text" id="encomenda" placeholder="Número da encomenda (ex: 00035625 / 530729)"><br>
-  <input type="text" id="bloqueio" placeholder="Tipo do bloqueio (ex: Erro 'encomenda em processamento')"><br>
+  
+  <!-- Combo para Tipo de Bloqueio -->
+  <select id="bloqueio">
+    <option value="">-- Selecione o tipo de bloqueio --</option>
+    <option>Erro "encomenda em processamento"</option>
+    <option>Erro de pagamento</option>
+    <option>Erro de stock</option>
+    <option>Erro técnico no sistema</option>
+    <option>Outro (especificar abaixo)</option>
+  </select><br>
+  
+  <!-- Caso seja "Outro", pode escrever manualmente -->
+  <input type="text" id="bloqueioOutro" placeholder="Outro tipo de bloqueio (opcional)"><br>
+
   <input type="text" id="substituicao" placeholder="Substituição (ex: substituição de artigos)"><br>
   <textarea id="detalhes" placeholder="Detalhes das substituições (ex: Substituição de Bife da Pá...)"></textarea><br>
   <input type="text" id="ticket" placeholder="Ticket do suporte (ex: 1832377)"><br>
@@ -60,10 +73,16 @@
 
     function gerarMensagem() {
       const encomenda = document.getElementById("encomenda").value;
-      const bloqueio = document.getElementById("bloqueio").value;
+      let bloqueio = document.getElementById("bloqueio").value;
+      const bloqueioOutro = document.getElementById("bloqueioOutro").value;
       const substituicao = document.getElementById("substituicao").value;
       const detalhes = document.getElementById("detalhes").value;
       const ticket = document.getElementById("ticket").value;
+
+      // Se escolheu "Outro", usa o texto digitado
+      if (bloqueio === "Outro (especificar abaixo)" && bloqueioOutro.trim() !== "") {
+        bloqueio = bloqueioOutro;
+      }
 
       mensagemGerada = 
 `Report Bloqueio
