@@ -38,8 +38,8 @@
       background-color: #1ebe57;
     }
 
-    /* Campo escondido por padrão */
-    #bloqueioOutro {
+    /* Campos extras escondidos por padrão */
+    #bloqueioOutro, #detalhesSubstituicao {
       display: none;
     }
   </style>
@@ -63,8 +63,17 @@
   <!-- Campo só aparece se for "Outro" -->
   <input type="text" id="bloqueioOutro" placeholder="Digite o tipo de bloqueio"><br>
 
-  <input type="text" id="substituicao" placeholder="Substituição (ex: substituição de artigos)"><br>
-  <textarea id="detalhes" placeholder="Detalhes das substituições (ex: Substituição de Bife da Pá...)"></textarea><br>
+  <!-- Combo Substituição -->
+  <select id="substituicao" onchange="mostrarDescricaoSubstituicao()">
+    <option value="">-- Houve substituição? --</option>
+    <option>Sim, teve substituição</option>
+    <option>Não teve substituição</option>
+    <option>Não teve substituição mas quero adicionar nota/descrição</option>
+  </select><br>
+
+  <!-- Campo descrição só aparece se for necessário -->
+  <textarea id="detalhesSubstituicao" placeholder="Descreva os artigos substituídos ou a nota adicional..."></textarea><br>
+
   <input type="text" id="ticket" placeholder="Ticket do suporte (ex: 1832377)"><br>
 
   <button onclick="gerarMensagem()">Gerar Mensagem</button>
@@ -88,12 +97,27 @@
       }
     }
 
+    function mostrarDescricaoSubstituicao() {
+      const select = document.getElementById("substituicao");
+      const campoDescricao = document.getElementById("detalhesSubstituicao");
+
+      if (
+        select.value === "Sim, teve substituição" ||
+        select.value === "Não teve substituição mas quero adicionar nota/descrição"
+      ) {
+        campoDescricao.style.display = "block";
+      } else {
+        campoDescricao.style.display = "none";
+        campoDescricao.value = "";
+      }
+    }
+
     function gerarMensagem() {
       const encomenda = document.getElementById("encomenda").value;
       let bloqueio = document.getElementById("bloqueio").value;
       const bloqueioOutro = document.getElementById("bloqueioOutro").value;
       const substituicao = document.getElementById("substituicao").value;
-      const detalhes = document.getElementById("detalhes").value;
+      const detalhes = document.getElementById("detalhesSubstituicao").value;
       const ticket = document.getElementById("ticket").value;
 
       // Se escolheu "Outro", usa o texto digitado
@@ -101,14 +125,17 @@
         bloqueio = bloqueioOutro;
       }
 
+      let textoSubstituicao = substituicao;
+      if (detalhes.trim() !== "") {
+        textoSubstituicao += `\n\n${detalhes}`;
+      }
+
       mensagemGerada = 
 `Report Bloqueio
 
 Encomenda: ${encomenda}
 Tipo do Bloqueio: ${bloqueio}
-Substituição: ${substituicao}
-
-${detalhes}
+Substituição: ${textoSubstituicao}
 
 Já contactado o 2370
 
