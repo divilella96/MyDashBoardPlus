@@ -51,7 +51,7 @@
   <input type="text" id="encomenda" placeholder="Número da encomenda (ex: 00035625 / 530729)"><br>
   
   <!-- Combo para Tipo de Bloqueio -->
- <select id="bloqueio">
+ <select id="bloqueio" onchange="mostrarOutro()">
     <option value="">-- Selecione o tipo de bloqueio --</option>
     <option>Erro "encomenda em processamento"</option>
     <option>O valor do pedido é superior ao valor permitido</option>
