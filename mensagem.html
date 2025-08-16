@@ -47,8 +47,11 @@
 <body>
   <h1>Gerar Report Bloqueio</h1>
 
-  <input type="text" id="numero" placeholder="Número com DDI (ex: 351912345678)"><br>
-  <input type="text" id="encomenda" placeholder="Número da encomenda (ex: 00035625 / 530729)"><br>
+  <label for="numero">Número WhatsApp</label><br>
+  <input type="tel" id="numero" placeholder="+351 912 345 678" inputmode="numeric"><br><br>
+  
+  <label for="encomenda">Número da Encomenda</label><br>
+  <input type="tel" id="encomenda" placeholder="00035625 / 530729" inputmode="numeric"><br><br>
   
   <!-- Combo para Tipo de Bloqueio -->
  <select id="bloqueio" onchange="mostrarOutro()">
@@ -74,7 +77,8 @@
   <!-- Campo descrição só aparece se for necessário -->
   <textarea id="detalhesSubstituicao" placeholder="Descreva os artigos substituídos ou a nota adicional..."></textarea><br>
 
-  <input type="text" id="ticket" placeholder="Ticket do suporte (ex: 1832377)"><br>
+  <label for="ticket">Ticket</label><br>
+  <input type="number" id="ticket" placeholder="1832377" inputmode="numeric"><br><br>
 
   <button onclick="gerarMensagem()">Gerar Mensagem</button>
   <button onclick="enviarWhatsApp()">Abrir no WhatsApp</button>
@@ -153,6 +157,35 @@ Ticket: ${ticket}`;
       const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensagemGerada)}`;
       window.open(url, "_blank");
     }
+
+      // 📱 Máscara para telefone internacional (+351 912 345 678)
+  document.getElementById("numero").addEventListener("input", function(e) {
+    let valor = e.target.value.replace(/\D/g, ""); // remove tudo que não for número
+    if(valor.startsWith("351")) {
+      valor = "+" + valor.replace(/^351/, "351 "); // adiciona + e espaço
+    } else if(valor.startsWith("55")) {
+      valor = "+" + valor.replace(/^55/, "55 "); // ex. Brasil
+    }
+    valor = valor.replace(/(\+\d{2,3})(\d{3})(\d{3})(\d{3})$/, "$1 $2 $3 $4");
+    e.target.value = valor;
+  });
+
+  // 📦 Máscara para encomenda (00035625 / 530729)
+  document.getElementById("encomenda").addEventListener("input", function(e) {
+    let valor = e.target.value.replace(/\D/g, ""); // só números
+    if (valor.length > 8) {
+      valor = valor.slice(0, 8) + " / " + valor.slice(8);
+    }
+    e.target.value = valor;
+  });
+
+  // 🎫 Ticket só números (remove letras automaticamente)
+  document.getElementById("ticket").addEventListener("input", function(e) {
+    e.target.value = e.target.value.replace(/\D/g, ""); 
+  });
   </script>
+ 
+
+
 </body>
 </html>
