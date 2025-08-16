@@ -108,8 +108,17 @@
     <label for="numero">Número WhatsApp</label>
     <input type="tel" id="numero" placeholder="+351 912 345 678" inputmode="numeric">
     
-    <label for="encomenda">Número da Encomenda</label>
-    <input type="tel" id="encomenda" placeholder="00035625 / 530729" inputmode="numeric">
+    <label for="encomenda">Encomenda:</label>
+    <input 
+      type="text" 
+      id="encomenda" 
+      name="encomenda" 
+      placeholder="Ex: 00035625 / 530729" 
+      pattern="^\d+\s*/\s*\d{6}$" 
+      required 
+      inputmode="numeric"
+    />
+    <small>Formato: número / 6 dígitos (ex: 00035625 / 530729)</small>
     
     <label for="bloqueio">Tipo de Bloqueio</label>
     <select id="bloqueio" onchange="mostrarOutro()">
