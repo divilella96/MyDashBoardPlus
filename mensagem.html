@@ -201,6 +201,11 @@
         textoSubstituicao += `\n\n${detalhes}`;
       }
 
+      const agora = new Date();
+      const horas = String(agora.getHours()).padStart(2, '0');
+      const minutos = String(agora.getMinutes()).padStart(2, '0');
+      const horaFormatada = `${horas}:${minutos}`;
+
       mensagemGerada =
 `Report Bloqueio
 
@@ -208,7 +213,7 @@ Encomenda: ${encomenda}
 Tipo do Bloqueio: ${bloqueio}
 Substituição: ${textoSubstituicao}
 
-Já contactado o 2370
+Já contactado o 2370 - ${horaFormatada}
 
 Ticket: ${ticket}`;
 
