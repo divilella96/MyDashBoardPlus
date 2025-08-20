@@ -201,7 +201,7 @@
         textoSubstituicao += `\n\n${detalhes}`;
       }
 
-      mensagemGerada = 
+      mensagemGerada =
 `Report Bloqueio
 
 Encomenda: ${encomenda}
@@ -213,6 +213,20 @@ Já contactado o 2370
 Ticket: ${ticket}`;
 
       document.getElementById("preview").innerText = mensagemGerada;
+
+      // Copiar para a área de transferência
+      navigator.clipboard.writeText(mensagemGerada).then(() => {
+        // Feedback para o usuário
+        const botao = document.querySelector("button[onclick='gerarMensagem()']");
+        const textoOriginal = botao.innerText;
+        botao.innerText = "Copiado!";
+        setTimeout(() => {
+          botao.innerText = textoOriginal;
+        }, 2000); // Volta ao texto original após 2 segundos
+      }).catch(err => {
+        console.error("Erro ao copiar a mensagem: ", err);
+        alert("Ocorreu um erro ao copiar a mensagem.");
+      });
     }
 
     function enviarWhatsApp() {
