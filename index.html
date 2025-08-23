@@ -57,10 +57,15 @@
       <button onclick="abrirOrderManagementRato()">Rato - Encomendas e C&C</button>
       <button onclick="abrirLiveOperationsRato()">Rato - Em Direto</button>
       <button onclick="abrirMensagemWhatsApp()">Gerar mensagem WhatsApp</button>
+      <button onclick="abrirPaginaContato()">E-mail Artigo Esquecido</button>
     </div>
   </div>
 
   <script>
+    function abrirPaginaContato() {
+      window.open("contact.html", "_blank");
+    }
+
     function getStatusList() {
       return [
         "Pending",
