@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gerar Report Bloqueio WhatsApp</title>
   <style>
     body {
@@ -87,6 +88,18 @@
       font-size: 14px;
     }
 
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
     /* Responsividade */
     @media (max-width: 600px) {
       body {
@@ -105,53 +118,59 @@
   <div class="container">
     <h1>Gerar Report Bloqueio</h1>
 
-    <label for="numero">Número WhatsApp</label>
-    <input type="tel" id="numero" placeholder="+351 912 345 678 (P/ validar insira o seu!)" inputmode="numeric">
-  
-    <label for="encomenda">Encomenda:</label>
-    <input 
-      type="text" 
-      id="encomenda" 
-      name="encomenda" 
-      placeholder="Ex: 00035625 / 530729" 
-      required 
-      inputmode="numeric"
-    />
-    <small id="erro-encomenda" style="color:red; display:none;">
-    ⚠️ O número após a barra deve ter exatamente 6 dígitos.
-    </small>
-
+    <form>
+      <label for="numero">Número WhatsApp</label>
+      <input type="tel" id="numero" placeholder="+351 912 345 678 (P/ validar insira o seu!)" inputmode="numeric">
     
-    <label for="bloqueio">Tipo de Bloqueio</label>
-    <select id="bloqueio" onchange="mostrarOutro()">
-      <option value="">-- Selecione o tipo de bloqueio --</option>
-      <option>Erro "encomenda em processamento"</option>
-      <option>O valor do pedido é superior ao valor permitido</option>
-      <option>Erro de duplicidade</option>
-      <option>Erro descohecido</option>
-      <option>Outro (especificar abaixo)</option>
-    </select>
+      <label for="encomenda">Encomenda:</label>
+      <input
+        type="text"
+        id="encomenda"
+        name="encomenda"
+        placeholder="Ex: 00035625 / 530729"
+        required
+        inputmode="numeric"
+      />
+      <small id="erro-encomenda" style="color:red; display:none;">
+      ⚠️ O número após a barra deve ter exatamente 6 dígitos.
+      </small>
 
-    <input type="text" id="bloqueioOutro" placeholder="Digite o tipo de bloqueio">
 
-    <label for="substituicao">Houve substituição?</label>
-    <select id="substituicao" onchange="mostrarDescricaoSubstituicao()">
-      <option value="">-- Selecione --</option>
-      <option>Sim, teve substituição</option>
-      <option>Não teve substituição</option>
-      <option>Não teve substituição mas quero adicionar nota/descrição</option>
-    </select>
+      <label for="bloqueio">Tipo de Bloqueio</label>
+      <select id="bloqueio" onchange="mostrarOutro()">
+        <option value="">-- Selecione o tipo de bloqueio --</option>
+        <option>Erro "encomenda em processamento"</option>
+        <option>O valor do pedido é superior ao valor permitido</option>
+        <option>Erro de duplicidade</option>
+        <option>Erro descohecido</option>
+        <option>Outro (especificar abaixo)</option>
+      </select>
 
-    <textarea id="detalhesSubstituicao" placeholder="Descreva os artigos substituídos ou a nota adicional..."></textarea>
+      <label for="bloqueioOutro" class="visually-hidden">Especifique o tipo de bloqueio</label>
+      <input type="text" id="bloqueioOutro" placeholder="Digite o tipo de bloqueio">
 
-    <label for="ticket">Ticket</label>
-    <input type="number" id="ticket" placeholder="1832377" inputmode="numeric">
+      <label for="substituicao">Houve substituição?</label>
+      <select id="substituicao" onchange="mostrarDescricaoSubstituicao()">
+        <option value="">-- Selecione --</option>
+        <option>Sim, teve substituição</option>
+        <option>Não teve substituição</option>
+        <option>Não teve substituição mas quero adicionar nota/descrição</option>
+      </select>
 
-    <button onclick="gerarMensagem()">Gerar Mensagem</button>
-    <button class="btn-secondary" onclick="enviarWhatsApp()">Abrir no WhatsApp</button>
+      <label for="detalhesSubstituicao" class="visually-hidden">Detalhes da substituição ou nota adicional</label>
+      <textarea id="detalhesSubstituicao" placeholder="Descreva os artigos substituídos ou a nota adicional..."></textarea>
+
+      <label for="ticket">Ticket</label>
+      <input type="number" id="ticket" placeholder="1832377" inputmode="numeric">
+
+      <button type="button" onclick="gerarMensagem()">Gerar Mensagem</button>
+      <button type="button" class="btn-secondary" onclick="enviarWhatsApp()">Abrir no WhatsApp</button>
+    </form>
 
     <h3>Prévia da Mensagem:</h3>
-    <pre id="preview"></pre>
+    <pre id="preview" aria-live="polite"></pre>
+
+    <div class="visually-hidden" aria-live="polite" id="status-announcer"></div>
   </div>
 
   <script>
@@ -163,6 +182,7 @@
 
       if (select.value === "Outro (especificar abaixo)") {
         outroCampo.style.display = "block";
+        outroCampo.focus();
       } else {
         outroCampo.style.display = "none";
         outroCampo.value = "";
@@ -178,6 +198,7 @@
         select.value === "Não teve substituição mas quero adicionar nota/descrição"
       ) {
         campoDescricao.style.display = "block";
+        campoDescricao.focus();
       } else {
         campoDescricao.style.display = "none";
         campoDescricao.value = "";
@@ -218,18 +239,26 @@ Já contactado o 2370 - ${horaFormatada}
 Ticket: ${ticket}`;
 
       document.getElementById("preview").innerText = mensagemGerada;
+      const announcer = document.getElementById('status-announcer');
 
       // Copiar para a área de transferência
       navigator.clipboard.writeText(mensagemGerada).then(() => {
-        // Feedback para o usuário
+        // Feedback visual
         const botao = document.querySelector("button[onclick='gerarMensagem()']");
         const textoOriginal = botao.innerText;
         botao.innerText = "Copiado!";
         setTimeout(() => {
           botao.innerText = textoOriginal;
-        }, 2000); // Volta ao texto original após 2 segundos
+        }, 2000);
+
+        // Feedback para leitores de tela
+        announcer.textContent = 'Mensagem copiada para a área de transferência.';
+        setTimeout(() => { announcer.textContent = '' }, 3000);
+
       }).catch(err => {
         console.error("Erro ao copiar a mensagem: ", err);
+        announcer.textContent = 'Ocorreu um erro ao copiar a mensagem.';
+        setTimeout(() => { announcer.textContent = '' }, 3000);
         alert("Ocorreu um erro ao copiar a mensagem.");
       });
     }
