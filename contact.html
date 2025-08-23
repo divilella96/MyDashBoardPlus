@@ -160,6 +160,15 @@
       window.location.href = mailtoLink;
     });
 
+    // 📦 Máscara encomenda from mensagem.html
+    document.getElementById("encomenda").addEventListener("input", function(e) {
+      let valor = e.target.value.replace(/\D/g, "");
+      if (valor.length > 8) {
+        valor = valor.slice(0, 8) + " / " + valor.slice(8);
+      }
+      e.target.value = valor;
+    });
+
     const campoEncomenda = document.getElementById("encomenda");
     const erro = document.getElementById("erro-encomenda");
 
