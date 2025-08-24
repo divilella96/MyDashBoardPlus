@@ -122,6 +122,24 @@
         <textarea id="descricao" name="descricao" placeholder="Descreva os produtos esquecidos..."></textarea>
       </div>
 
+      <div class="checkbox-container">
+        <input type="checkbox" id="adicionar_sacos" onchange="toggleSacos()">
+        <label for="adicionar_sacos">Definir a quantidade de sacos?</label>
+      </div>
+
+      <div id="sacos_container" style="display: none;">
+        <label for="quantidade_sacos">Quantidade de Sacos</label>
+        <input type="number" id="quantidade_sacos" name="quantidade_sacos" inputmode="numeric" min="1" style="margin-bottom: 15px;">
+
+        <label for="tipo_produto">Tipo de Produto</label>
+        <select id="tipo_produto" name="tipo_produto">
+          <option value="">-- Selecione o tipo --</option>
+          <option value="Fresco">Fresco</option>
+          <option value="Congelado">Congelado</option>
+          <option value="Seco">Seco</option>
+        </select>
+      </div>
+
       <button type="submit">Enviar E-mail</button>
     </form>
   </div>
@@ -137,6 +155,16 @@
       }
     }
 
+    function toggleSacos() {
+      const checkbox = document.getElementById('adicionar_sacos');
+      const container = document.getElementById('sacos_container');
+      if (checkbox.checked) {
+        container.style.display = 'block';
+      } else {
+        container.style.display = 'none';
+      }
+    }
+
     document.getElementById('contactForm').addEventListener('submit', function(event) {
       event.preventDefault();
 
@@ -144,6 +172,9 @@
       const motivo = document.getElementById('motivo').value;
       const adicionarDescricao = document.getElementById('adicionar_descricao').checked;
       const descricao = document.getElementById('descricao').value;
+      const adicionarSacos = document.getElementById('adicionar_sacos').checked;
+      const quantidadeSacos = document.getElementById('quantidade_sacos').value;
+      const tipoProduto = document.getElementById('tipo_produto').value;
 
       const to = 'help@lyzer.pt';
       const subject = `Artigo Esquecido - Encomenda ${encomenda}`;
@@ -153,6 +184,11 @@
 
       if (adicionarDescricao) {
         body += `Descrição: ${descricao}\n`;
+      }
+
+      if (adicionarSacos) {
+        body += `\nQuantidade de Sacos: ${quantidadeSacos}\n`;
+        body += `Tipo de Produto: ${tipoProduto}\n`;
       }
 
       const mailtoLink = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
