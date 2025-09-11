@@ -2,65 +2,27 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Abrir URLs com data e hora atual</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 40px;
-      background-color: #f0f0f0;
-      text-align: center;
-    }
-
-    h1 {
-      margin-bottom: 30px;
-    }
-
-    .container {
-      display: flex;
-      justify-content: center;
-      gap: 40px;
-      flex-wrap: wrap;
-    }
-
-    .coluna {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      min-width: 250px;
-    }
-
-    .coluna h2 {
-      margin-bottom: 10px;
-    }
-
-    button {
-      padding: 12px 24px;
-      font-size: 15px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lyzer Tech - Ferramentas</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Abrir links com data e hora atual do dispositivo</h1>
-
   <div class="container"> 
+    <h1>Ferramentas de Operações</h1>
     <div class="coluna">
       <h2>Rato</h2>
-      <button onclick="abrirOrderManagementRato()">Rato - Encomendas e C&C</button>
-      <button onclick="abrirLiveOperationsRato()">Rato - Em Direto</button>
-      <button onclick="abrirMensagemWhatsApp()">Gerar mensagem WhatsApp</button>
+      <button class="btn-primary" onclick="abrirOrderManagementRato()">Rato - Encomendas e C&C</button>
+      <button class="btn-primary" onclick="abrirLiveOperationsRato()">Rato - Em Direto</button>
+      <button class="btn-primary" onclick="abrirMensagemWhatsApp()">Gerar mensagem WhatsApp</button>
+      <button class="btn-primary" onclick="abrirPaginaContato()">E-mail Artigo Esquecido</button>
     </div>
   </div>
 
   <script>
+    function abrirPaginaContato() {
+      window.open("contact.html", "_blank");
+    }
+
     function getStatusList() {
       return [
         "Pending",

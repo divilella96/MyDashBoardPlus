@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contacto - Artigo Esquecido</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Contacto - Artigo Esquecido</h1>
+
+    <form id="contactForm">
+      <label for="encomenda">Número da Encomenda</label>
+      <input type="tel" id="encomenda" name="encomenda" placeholder="Ex: 00035625 / 530729" required inputmode="numeric">
+      <small id="erro-encomenda" style="color:red; display:none;">
+      ⚠️ O número após a barra deve ter exatamente 6 dígitos.
+      </small>
+
+      <label for="motivo">Motivo</label>
+      <select id="motivo" name="motivo" required>
+        <option value="">-- Selecione o motivo --</option>
+        <option value="artigo esquecido em loja">Artigo esquecido em loja</option>
+        <option value="artigo esquecido na carrinha">Artigo esquecido na carrinha</option>
+        <option value="artigo esquecido pelo picker">Artigo esquecido pelo picker</option>
+      </select>
+
+      <div class="checkbox-container">
+        <input type="checkbox" id="adicionar_descricao" onchange="toggleDescricao()">
+        <label for="adicionar_descricao">Adicionar descrição dos produtos esquecidos?</label>
+      </div>
+
+      <div id="descricao_container" style="display: none;">
+        <label for="descricao">Descrição</label>
+        <textarea id="descricao" name="descricao" placeholder="Descreva os produtos esquecidos..."></textarea>
+      </div>
+
+      <div class="checkbox-container">
+        <input type="checkbox" id="adicionar_sacos" onchange="toggleSacos()">
+        <label for="adicionar_sacos">Definir a quantidade de sacos?</label>
+      </div>
+
+      <div id="sacos_container">
+        <label for="quantidade_sacos">Quantidade de Sacos</label>
+        <input type="number" id="quantidade_sacos" name="quantidade_sacos" inputmode="numeric" min="1">
+
+        <label for="tipo_produto">Tipo de Produto</label>
+        <select id="tipo_produto" name="tipo_produto">
+          <option value="">-- Selecione o tipo --</option>
+          <option value="Fresco">Fresco</option>
+          <option value="Congelado">Congelado</option>
+          <option value="Seco">Seco</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-primary">Enviar E-mail</button>
+    </form>
+  </div>
+
+  <script>
+    function toggleDescricao() {
+      const checkbox = document.getElementById('adicionar_descricao');
+      const container = document.getElementById('descricao_container');
+      if (checkbox.checked) {
+        container.style.display = 'block';
+      } else {
+        container.style.display = 'none';
+      }
+    }
+
+    function toggleSacos() {
+      const checkbox = document.getElementById('adicionar_sacos');
+      const container = document.getElementById('sacos_container');
+      if (checkbox.checked) {
+        // Use flex to respect the container's gap
+        container.style.display = 'flex';
+      } else {
+        container.style.display = 'none';
+      }
+    }
+
+    // Initialize hidden containers on page load
+    document.addEventListener('DOMContentLoaded', (event) => {
+        document.getElementById('descricao_container').style.display = 'none';
+        document.getElementById('sacos_container').style.display = 'none';
+    });
+
+    document.getElementById('contactForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const encomenda = document.getElementById('encomenda').value;
+      const motivo = document.getElementById('motivo').value;
+      const adicionarDescricao = document.getElementById('adicionar_descricao').checked;
+      const descricao = document.getElementById('descricao').value;
+      const adicionarSacos = document.getElementById('adicionar_sacos').checked;
+      const quantidadeSacos = document.getElementById('quantidade_sacos').value;
+      const tipoProduto = document.getElementById('tipo_produto').value;
+
+      const to = 'help@lyzer.pt';
+      const subject = `Artigo Esquecido - Encomenda ${encomenda}`;
+
+      let body = `Número da Encomenda: ${encomenda}\n`;
+      body += `Motivo: ${motivo}\n`;
+
+      if (adicionarDescricao && descricao) {
+        body += `\nDescrição: ${descricao}\n`;
+      }
+
+      if (adicionarSacos && quantidadeSacos && tipoProduto) {
+        body += `\nQuantidade de Sacos: ${quantidadeSacos}\n`;
+        body += `Tipo de Produto: ${tipoProduto}\n`;
+      }
+
+      const mailtoLink = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+      window.location.href = mailtoLink;
+    });
+
+    // 📦 Máscara encomenda from mensagem.html
+    document.getElementById("encomenda").addEventListener("input", function(e) {
+      let valor = e.target.value.replace(/\D/g, "");
+      if (valor.length > 8) {
+        valor = valor.slice(0, 8) + " / " + valor.slice(8);
+      }
+      e.target.value = valor;
+    });
+
+    const campoEncomenda = document.getElementById("encomenda");
+    const erro = document.getElementById("erro-encomenda");
+
+    campoEncomenda.addEventListener("input", function(e) {
+        let valor = e.target.value.replace(/[^0-9/]/g, ""); // só números e "/"
+
+        // Se já tem "/", divide em duas partes
+        if (valor.includes("/")) {
+        let [antes, depois] = valor.split("/");
+
+        // Remove espaços extras
+        antes = antes.trim();
+        depois = depois.trim();
+
+        // Limita a parte depois da "/" a 6 dígitos
+        depois = depois.slice(0, 6);
+
+        valor = antes + " / " + depois;
+
+        // Validação: precisa ter exatamente 6 dígitos depois da barra
+        if (depois.length === 6) {
+            erro.style.display = "none";
+            campoEncomenda.setCustomValidity("");
+        } else {
+            erro.style.display = "block";
+            campoEncomenda.setCustomValidity("O número após a barra deve ter exatamente 6 dígitos.");
+        }
+        }
+
+        e.target.value = valor;
+    });
+  </script>
+</body>
+</html>
