@@ -4,127 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gerar Report Bloqueio WhatsApp</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f9f9f9;
-      padding: 20px;
-      margin: 0;
-    }
-
-    .container {
-      max-width: 500px;
-      margin: 0 auto;
-      background: #fff;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 10px;
-      font-size: 1.5rem;
-    }
-
-    label {
-      text-align: left;
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    input, textarea, select {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-
-    textarea {
-      height: 100px;
-    }
-
-    button {
-      padding: 14px;
-      font-size: 16px;
-      background-color: #25d366;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      width: 100%;
-      font-weight: bold;
-    }
-
-    button:hover {
-      background-color: #1ebe57;
-    }
-
-    .btn-secondary {
-      background-color: #007bff;
-    }
-
-    .btn-secondary:hover {
-      background-color: #0056b3;
-    }
-
-    /* Campos extras escondidos por padrão */
-    #bloqueioOutro, #detalhesSubstituicao {
-      display: none;
-    }
-
-    pre {
-      text-align: left;
-      background: #f5f5f5;
-      padding: 15px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      white-space: pre-wrap;
-      font-size: 14px;
-    }
-
-    .visually-hidden {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border-width: 0;
-    }
-
-    /* Responsividade */
-    @media (max-width: 600px) {
-      body {
-        padding: 10px;
-      }
-      .container {
-        padding: 15px;
-      }
-      h1 {
-        font-size: 1.3rem;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
     <h1>Gerar Report Bloqueio</h1>
 
-    <form>
+    <form onsubmit="return false;">
       <label for="numero">Número WhatsApp</label>
-      <input type="tel" id="numero" placeholder="+351 912 345 678 (P/ validar insira o seu!)" inputmode="numeric">
+      <input type="tel" id="numero" placeholder="+351 912 345 678 (P/ validar insira o seu!)" inputmode="tel">
     
       <label for="encomenda">Encomenda:</label>
       <input
-        type="text"
+        type="tel"
         id="encomenda"
         name="encomenda"
         placeholder="Ex: 00035625 / 530729"
@@ -134,7 +26,6 @@
       <small id="erro-encomenda" style="color:red; display:none;">
       ⚠️ O número após a barra deve ter exatamente 6 dígitos.
       </small>
-
 
       <label for="bloqueio">Tipo de Bloqueio</label>
       <select id="bloqueio" onchange="mostrarOutro()">
@@ -147,8 +38,10 @@
         <option>Outro (especificar abaixo)</option>
       </select>
 
-      <label for="bloqueioOutro" class="visually-hidden">Especifique o tipo de bloqueio</label>
-      <input type="text" id="bloqueioOutro" placeholder="Digite o tipo de bloqueio">
+      <div id="bloqueioOutro" style="display: none;">
+        <label for="bloqueioOutro" class="visually-hidden">Especifique o tipo de bloqueio</label>
+        <input type="text" id="bloqueioOutro" placeholder="Digite o tipo de bloqueio">
+      </div>
 
       <label for="substituicao">Houve substituição?</label>
       <select id="substituicao" onchange="mostrarDescricaoSubstituicao()">
@@ -158,14 +51,16 @@
         <option>Não teve substituição mas quero adicionar nota/descrição</option>
       </select>
 
-      <label for="detalhesSubstituicao" class="visually-hidden">Detalhes da substituição ou nota adicional</label>
-      <textarea id="detalhesSubstituicao" placeholder="Descreva os artigos substituídos ou a nota adicional..."></textarea>
+      <div id="detalhesSubstituicao" style="display: none;">
+        <label for="detalhesSubstituicao" class="visually-hidden">Detalhes da substituição ou nota adicional</label>
+        <textarea id="detalhesSubstituicao" placeholder="Descreva os artigos substituídos ou a nota adicional..."></textarea>
+      </div>
 
       <label for="ticket">Ticket</label>
       <input type="number" id="ticket" placeholder="1832377" inputmode="numeric">
 
-      <button type="button" onclick="gerarMensagem()">Gerar Mensagem</button>
-      <button type="button" class="btn-secondary" onclick="enviarWhatsApp()">Abrir no WhatsApp</button>
+      <button type="button" class="btn-whatsapp" onclick="gerarMensagem()">Gerar Mensagem</button>
+      <button type="button" class="btn-primary" onclick="enviarWhatsApp()">Abrir no WhatsApp</button>
     </form>
 
     <h3>Prévia da Mensagem:</h3>
@@ -180,7 +75,6 @@
     function mostrarOutro() {
       const select = document.getElementById("bloqueio");
       const outroCampo = document.getElementById("bloqueioOutro");
-
       if (select.value === "Outro (especificar abaixo)") {
         outroCampo.style.display = "block";
         outroCampo.focus();
@@ -193,7 +87,6 @@
     function mostrarDescricaoSubstituicao() {
       const select = document.getElementById("substituicao");
       const campoDescricao = document.getElementById("detalhesSubstituicao");
-
       if (
         select.value === "Sim, teve substituição" ||
         select.value === "Não teve substituição mas quero adicionar nota/descrição"
@@ -242,17 +135,13 @@ Ticket: ${ticket}`;
       document.getElementById("preview").innerText = mensagemGerada;
       const announcer = document.getElementById('status-announcer');
 
-      // Copiar para a área de transferência
       navigator.clipboard.writeText(mensagemGerada).then(() => {
-        // Feedback visual
         const botao = document.querySelector("button[onclick='gerarMensagem()']");
         const textoOriginal = botao.innerText;
         botao.innerText = "Copiado!";
         setTimeout(() => {
           botao.innerText = textoOriginal;
         }, 2000);
-
-        // Feedback para leitores de tela
         announcer.textContent = 'Mensagem copiada para a área de transferência.';
         setTimeout(() => { announcer.textContent = '' }, 3000);
 
@@ -274,7 +163,6 @@ Ticket: ${ticket}`;
       window.open(url, "_blank");
     }
 
-    // 📱 Máscara telefone
     document.getElementById("numero").addEventListener("input", function(e) {
       let valor = e.target.value.replace(/\D/g, "");
       if(valor.startsWith("351")) {
@@ -286,7 +174,6 @@ Ticket: ${ticket}`;
       e.target.value = valor;
     });
 
-    // 📦 Máscara encomenda
     document.getElementById("encomenda").addEventListener("input", function(e) {
       let valor = e.target.value.replace(/\D/g, "");
       if (valor.length > 8) {
@@ -295,42 +182,33 @@ Ticket: ${ticket}`;
       e.target.value = valor;
     });
 
-    // 🎫 Ticket só números
     document.getElementById("ticket").addEventListener("input", function(e) {
       e.target.value = e.target.value.replace(/\D/g, ""); 
     });
 
     const campoEncomenda = document.getElementById("encomenda");
-  const erro = document.getElementById("erro-encomenda");
+    const erro = document.getElementById("erro-encomenda");
 
-  campoEncomenda.addEventListener("input", function(e) {
-    let valor = e.target.value.replace(/[^0-9/]/g, ""); // só números e "/"
-    
-    // Se já tem "/", divide em duas partes
-    if (valor.includes("/")) {
-      let [antes, depois] = valor.split("/");
+    campoEncomenda.addEventListener("input", function(e) {
+        let valor = e.target.value.replace(/[^0-9/]/g, ""); // só números e "/"
 
-      // Remove espaços extras
-      antes = antes.trim();
-      depois = depois.trim();
+        if (valor.includes("/")) {
+        let [antes, depois] = valor.split("/");
+        antes = antes.trim();
+        depois = depois.trim();
+        depois = depois.slice(0, 6);
+        valor = antes + " / " + depois;
 
-      // Limita a parte depois da "/" a 6 dígitos
-      depois = depois.slice(0, 6);
-
-      valor = antes + " / " + depois;
-
-      // Validação: precisa ter exatamente 6 dígitos depois da barra
-      if (depois.length === 6) {
-        erro.style.display = "none";
-        campoEncomenda.setCustomValidity(""); 
-      } else {
-        erro.style.display = "block";
-        campoEncomenda.setCustomValidity("O número após a barra deve ter exatamente 6 dígitos.");
-      }
-    }
-
-    e.target.value = valor;
-  });
+        if (depois.length === 6) {
+            erro.style.display = "none";
+            campoEncomenda.setCustomValidity("");
+        } else {
+            erro.style.display = "block";
+            campoEncomenda.setCustomValidity("O número após a barra deve ter exatamente 6 dígitos.");
+        }
+        }
+        e.target.value = valor;
+    });
   </script>
 </body>
 </html>

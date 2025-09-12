@@ -4,94 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contacto - Artigo Esquecido</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f9f9f9;
-      padding: 20px;
-      margin: 0;
-    }
-
-    .container {
-      max-width: 500px;
-      margin: 0 auto;
-      background: #fff;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 10px;
-      font-size: 1.5rem;
-    }
-
-    label {
-      text-align: left;
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    input, textarea, select {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-
-    .checkbox-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    input[type="checkbox"] {
-      width: auto;
-    }
-
-    textarea {
-      height: 100px;
-    }
-
-    button {
-      padding: 14px;
-      font-size: 16px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      width: 100%;
-      font-weight: bold;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    #descricao_container {
-      display: none;
-    }
-
-    /* Responsividade */
-    @media (max-width: 600px) {
-      body {
-        padding: 10px;
-      }
-      .container {
-        padding: 15px;
-      }
-      h1 {
-        font-size: 1.3rem;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
@@ -117,7 +30,7 @@
         <label for="adicionar_descricao">Adicionar descrição dos produtos esquecidos?</label>
       </div>
 
-      <div id="descricao_container">
+      <div id="descricao_container" style="display: none;">
         <label for="descricao">Descrição</label>
         <textarea id="descricao" name="descricao" placeholder="Descreva os produtos esquecidos..."></textarea>
       </div>
@@ -129,7 +42,7 @@
 
       <div id="sacos_container" style="display: none;">
         <label for="quantidade_sacos">Quantidade de Sacos</label>
-        <input type="number" id="quantidade_sacos" name="quantidade_sacos" inputmode="numeric" min="1" style="margin-bottom: 15px;">
+        <input type="number" id="quantidade_sacos" name="quantidade_sacos" inputmode="numeric" min="1">
 
         <label for="tipo_produto">Tipo de Produto</label>
         <select id="tipo_produto" name="tipo_produto">
@@ -140,101 +53,72 @@
         </select>
       </div>
 
-      <button type="submit">Enviar E-mail</button>
+      <button type="submit" class="btn-primary">Enviar E-mail</button>
     </form>
   </div>
 
   <script>
     function toggleDescricao() {
-      const checkbox = document.getElementById('adicionar_descricao');
       const container = document.getElementById('descricao_container');
-      if (checkbox.checked) {
-        container.style.display = 'block';
-      } else {
-        container.style.display = 'none';
-      }
+      container.style.display = document.getElementById('adicionar_descricao').checked ? 'block' : 'none';
     }
 
     function toggleSacos() {
-      const checkbox = document.getElementById('adicionar_sacos');
       const container = document.getElementById('sacos_container');
-      if (checkbox.checked) {
-        container.style.display = 'block';
-      } else {
-        container.style.display = 'none';
-      }
+      container.style.display = document.getElementById('adicionar_sacos').checked ? 'flex' : 'none';
     }
 
-    document.getElementById('contactForm').addEventListener('submit', function(event) {
-      event.preventDefault();
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('descricao_container').style.display = 'none';
+      document.getElementById('sacos_container').style.display = 'none';
 
-      const encomenda = document.getElementById('encomenda').value;
-      const motivo = document.getElementById('motivo').value;
-      const adicionarDescricao = document.getElementById('adicionar_descricao').checked;
-      const descricao = document.getElementById('descricao').value;
-      const adicionarSacos = document.getElementById('adicionar_sacos').checked;
-      const quantidadeSacos = document.getElementById('quantidade_sacos').value;
-      const tipoProduto = document.getElementById('tipo_produto').value;
+      document.getElementById('contactForm').addEventListener('submit', function(event) {
+        event.preventDefault();
 
-      const to = 'help@lyzer.pt';
-      const subject = `Artigo Esquecido - Encomenda ${encomenda}`;
+        const encomenda = document.getElementById('encomenda').value;
+        const motivo = document.getElementById('motivo').value;
+        const descricao = document.getElementById('descricao').value;
+        const quantidadeSacos = document.getElementById('quantidade_sacos').value;
+        const tipoProduto = document.getElementById('tipo_produto').value;
 
-      let body = `Número da Encomenda: ${encomenda}\n`;
-      body += `Motivo: ${motivo}\n`;
+        const to = 'help@lyzer.pt';
+        const subject = `Artigo Esquecido - Encomenda ${encomenda}`;
 
-      if (adicionarDescricao) {
-        body += `Descrição: ${descricao}\n`;
-      }
+        let body = `Número da Encomenda: ${encomenda}\n`;
+        body += `Motivo: ${motivo}\n`;
 
-      if (adicionarSacos) {
-        body += `\nQuantidade de Sacos: ${quantidadeSacos}\n`;
-        body += `Tipo de Produto: ${tipoProduto}\n`;
-      }
+        if (document.getElementById('adicionar_descricao').checked && descricao) {
+          body += `\nDescrição: ${descricao}\n`;
+        }
 
-      const mailtoLink = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        if (document.getElementById('adicionar_sacos').checked && quantidadeSacos && tipoProduto) {
+          body += `\nQuantidade de Sacos: ${quantidadeSacos}\n`;
+          body += `Tipo de Produto: ${tipoProduto}\n`;
+        }
 
-      window.location.href = mailtoLink;
+        const mailtoLink = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.location.href = mailtoLink;
+      });
     });
 
-    // 📦 Máscara encomenda from mensagem.html
+    // Máscara para o campo "Encomenda"
     document.getElementById("encomenda").addEventListener("input", function(e) {
-      let valor = e.target.value.replace(/\D/g, "");
-      if (valor.length > 8) {
-        valor = valor.slice(0, 8) + " / " + valor.slice(8);
-      }
-      e.target.value = valor;
-    });
-
-    const campoEncomenda = document.getElementById("encomenda");
-    const erro = document.getElementById("erro-encomenda");
-
-    campoEncomenda.addEventListener("input", function(e) {
-        let valor = e.target.value.replace(/[^0-9/]/g, ""); // só números e "/"
-
-        // Se já tem "/", divide em duas partes
-        if (valor.includes("/")) {
+      let valor = e.target.value.replace(/[^0-9/]/g, "");
+      if (valor.includes("/")) {
         let [antes, depois] = valor.split("/");
-
-        // Remove espaços extras
         antes = antes.trim();
-        depois = depois.trim();
-
-        // Limita a parte depois da "/" a 6 dígitos
-        depois = depois.slice(0, 6);
-
+        depois = depois.trim().slice(0, 6);
         valor = antes + " / " + depois;
 
-        // Validação: precisa ter exatamente 6 dígitos depois da barra
         if (depois.length === 6) {
-            erro.style.display = "none";
-            campoEncomenda.setCustomValidity("");
+          erro.style.display = "none";
+          e.target.setCustomValidity("");
         } else {
-            erro.style.display = "block";
-            campoEncomenda.setCustomValidity("O número após a barra deve ter exatamente 6 dígitos.");
+          erro.style.display = "block";
+          e.target.setCustomValidity("O número após a barra deve ter exatamente 6 dígitos.");
         }
-        }
-
-        e.target.value = valor;
+      }
+      e.target.value = valor;
     });
   </script>
 </body>
