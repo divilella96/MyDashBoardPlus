@@ -32,7 +32,7 @@
     }
 
     function abrirOrderManagementRato() {
-      const agora = new Date().toISOString();
+      const agora = getLocalISOString(new Date());
       const url = new URL("https://perform.lyzer.tech/pt/app/operations/order-management");
       url.searchParams.append("dateRange[from]", agora);
       ["191", "190"].forEach(st => url.searchParams.append("serviceTypes", st));
@@ -43,7 +43,7 @@
     }
 
     function abrirLiveOperationsRato() {
-      const agora = new Date().toISOString();
+      const agora = getLocalISOString(new Date());
       const url = new URL("https://perform.lyzer.tech/pt/app/operations/live-operations");
       url.searchParams.append("deliveryDeadline", agora);
       url.searchParams.append("retailer", "29");
@@ -57,6 +57,12 @@
 
     function abrirMensagemWhatsApp() {
       window.open("mensagem.html", "_blank");
+    }
+
+    function getLocalISOString(date) {
+      const offset = date.getTimezoneOffset();
+      const dateWithOffset = new Date(date.getTime() - (offset * 60 * 1000));
+      return dateWithOffset.toISOString().slice(0, -1);
     }
   </script>
 </body>
