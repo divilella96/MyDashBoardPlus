@@ -91,6 +91,7 @@ button {
   cursor: pointer;
   transition: background-color 0.2s, transform 0.1s;
   width: 100%;
+  margin-top: 10px;
 }
 
 button:hover { transform: translateY(-2px); }
