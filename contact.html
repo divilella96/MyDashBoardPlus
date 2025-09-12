@@ -10,7 +10,7 @@
   <div class="container">
     <h1>Contacto - Artigo Esquecido</h1>
 
-    <form id="contactForm">
+    <form id="contactForm" onsubmit="return false;">
       <label for="encomenda">Número da Encomenda</label>
       <input type="tel" id="encomenda" name="encomenda" placeholder="Ex: 00035625 / 530729" required inputmode="numeric">
       <small id="erro-encomenda" style="color:red; display:none;">
@@ -72,48 +72,47 @@
       const checkbox = document.getElementById('adicionar_sacos');
       const container = document.getElementById('sacos_container');
       if (checkbox.checked) {
-        // Use flex to respect the container's gap
         container.style.display = 'flex';
       } else {
         container.style.display = 'none';
       }
     }
 
-    // Initialize hidden containers on page load
     document.addEventListener('DOMContentLoaded', (event) => {
         document.getElementById('descricao_container').style.display = 'none';
         document.getElementById('sacos_container').style.display = 'none';
-    });
 
-    document.getElementById('contactForm').addEventListener('submit', function(event) {
-      event.preventDefault();
+        // Add submit listener
+        document.getElementById('contactForm').addEventListener('submit', function(event) {
+          event.preventDefault();
 
-      const encomenda = document.getElementById('encomenda').value;
-      const motivo = document.getElementById('motivo').value;
-      const adicionarDescricao = document.getElementById('adicionar_descricao').checked;
-      const descricao = document.getElementById('descricao').value;
-      const adicionarSacos = document.getElementById('adicionar_sacos').checked;
-      const quantidadeSacos = document.getElementById('quantidade_sacos').value;
-      const tipoProduto = document.getElementById('tipo_produto').value;
+          const encomenda = document.getElementById('encomenda').value;
+          const motivo = document.getElementById('motivo').value;
+          const adicionarDescricao = document.getElementById('adicionar_descricao').checked;
+          const descricao = document.getElementById('descricao').value;
+          const adicionarSacos = document.getElementById('adicionar_sacos').checked;
+          const quantidadeSacos = document.getElementById('quantidade_sacos').value;
+          const tipoProduto = document.getElementById('tipo_produto').value;
 
-      const to = 'help@lyzer.pt';
-      const subject = `Artigo Esquecido - Encomenda ${encomenda}`;
+          const to = 'help@lyzer.pt';
+          const subject = `Artigo Esquecido - Encomenda ${encomenda}`;
 
-      let body = `Número da Encomenda: ${encomenda}\n`;
-      body += `Motivo: ${motivo}\n`;
+          let body = `Número da Encomenda: ${encomenda}\n`;
+          body += `Motivo: ${motivo}\n`;
 
-      if (adicionarDescricao && descricao) {
-        body += `\nDescrição: ${descricao}\n`;
-      }
+          if (adicionarDescricao && descricao) {
+            body += `\nDescrição: ${descricao}\n`;
+          }
 
-      if (adicionarSacos && quantidadeSacos && tipoProduto) {
-        body += `\nQuantidade de Sacos: ${quantidadeSacos}\n`;
-        body += `Tipo de Produto: ${tipoProduto}\n`;
-      }
+          if (adicionarSacos && quantidadeSacos && tipoProduto) {
+            body += `\nQuantidade de Sacos: ${quantidadeSacos}\n`;
+            body += `Tipo de Produto: ${tipoProduto}\n`;
+          }
 
-      const mailtoLink = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+          const mailtoLink = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-      window.location.href = mailtoLink;
+          window.location.href = mailtoLink;
+        });
     });
 
     // 📦 Máscara encomenda from mensagem.html

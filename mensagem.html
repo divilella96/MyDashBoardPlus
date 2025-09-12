@@ -74,7 +74,6 @@
     function mostrarOutro() {
       const select = document.getElementById("bloqueio");
       const outroCampo = document.getElementById("bloqueioOutro");
-
       if (select.value === "Outro (especificar abaixo)") {
         outroCampo.style.display = "block";
         outroCampo.focus();
@@ -87,7 +86,6 @@
     function mostrarDescricaoSubstituicao() {
       const select = document.getElementById("substituicao");
       const campoDescricao = document.getElementById("detalhesSubstituicao");
-
       if (
         select.value === "Sim, teve substituição" ||
         select.value === "Não teve substituição mas quero adicionar nota/descrição"
@@ -136,17 +134,13 @@ Ticket: ${ticket}`;
       document.getElementById("preview").innerText = mensagemGerada;
       const announcer = document.getElementById('status-announcer');
 
-      // Copiar para a área de transferência
       navigator.clipboard.writeText(mensagemGerada).then(() => {
-        // Feedback visual
         const botao = document.querySelector("button[onclick='gerarMensagem()']");
         const textoOriginal = botao.innerText;
         botao.innerText = "Copiado!";
         setTimeout(() => {
           botao.innerText = textoOriginal;
         }, 2000);
-
-        // Feedback para leitores de tela
         announcer.textContent = 'Mensagem copiada para a área de transferência.';
         setTimeout(() => { announcer.textContent = '' }, 3000);
 
@@ -168,7 +162,6 @@ Ticket: ${ticket}`;
       window.open(url, "_blank");
     }
 
-    // 📱 Máscara telefone
     document.getElementById("numero").addEventListener("input", function(e) {
       let valor = e.target.value.replace(/\D/g, "");
       if(valor.startsWith("351")) {
@@ -180,7 +173,6 @@ Ticket: ${ticket}`;
       e.target.value = valor;
     });
 
-    // 📦 Máscara encomenda
     document.getElementById("encomenda").addEventListener("input", function(e) {
       let valor = e.target.value.replace(/\D/g, "");
       if (valor.length > 8) {
@@ -189,7 +181,6 @@ Ticket: ${ticket}`;
       e.target.value = valor;
     });
 
-    // 🎫 Ticket só números
     document.getElementById("ticket").addEventListener("input", function(e) {
       e.target.value = e.target.value.replace(/\D/g, ""); 
     });
@@ -200,20 +191,13 @@ Ticket: ${ticket}`;
     campoEncomenda.addEventListener("input", function(e) {
         let valor = e.target.value.replace(/[^0-9/]/g, ""); // só números e "/"
 
-        // Se já tem "/", divide em duas partes
         if (valor.includes("/")) {
         let [antes, depois] = valor.split("/");
-
-        // Remove espaços extras
         antes = antes.trim();
         depois = depois.trim();
-
-        // Limita a parte depois da "/" a 6 dígitos
         depois = depois.slice(0, 6);
-
         valor = antes + " / " + depois;
 
-        // Validação: precisa ter exatamente 6 dígitos depois da barra
         if (depois.length === 6) {
             erro.style.display = "none";
             campoEncomenda.setCustomValidity("");
@@ -222,7 +206,6 @@ Ticket: ${ticket}`;
             campoEncomenda.setCustomValidity("O número após a barra deve ter exatamente 6 dígitos.");
         }
         }
-
         e.target.value = valor;
     });
   </script>
