@@ -36,14 +36,42 @@ body {
   gap: 20px;
 }
 
-h1, h2 { text-align: center; color: #343a40; }
+.coluna {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* This will add space between the h2 and the buttons */
+}
+
+h1, h2, h3 { text-align: center; color: #343a40; }
 h1 { font-size: 1.8rem; }
 h2 { font-size: 1.5rem; }
+h3 { font-size: 1.2rem; margin-top: 20px; }
+
+pre {
+  background-color: #e9ecef;
+  padding: 15px;
+  border-radius: var(--border-radius);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin-top: 10px;
+}
 
 label {
   font-weight: 500;
   font-size: 0.9rem;
   color: #495057;
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+
+.checkbox-container label {
+  margin: 0; /* Override margin for checkbox labels */
+}
+
+form > label:first-of-type,
+form > .checkbox-container:first-of-type + label {
+  margin-top: 0;
 }
 
 input, textarea, select {
@@ -91,14 +119,20 @@ button {
   cursor: pointer;
   transition: background-color 0.2s, transform 0.1s;
   width: 100%;
-  margin-top: 10px;
 }
 
 button:hover { transform: translateY(-2px); }
 button:active { transform: translateY(0); }
 
+form button {
+  margin-top: 10px; /* Add space above buttons in forms */
+}
+
 .btn-primary { background-color: var(--primary-color); }
 .btn-primary:hover { background-color: var(--primary-hover); }
+
+.btn-secondary { background-color: var(--secondary-color); }
+.btn-secondary:hover { background-color: var(--secondary-hover); }
 
 #sacos_container {
   display: none;
