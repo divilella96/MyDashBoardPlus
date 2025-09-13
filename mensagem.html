@@ -13,6 +13,12 @@
     <form onsubmit="return false;">
       <label for="numero">Número WhatsApp</label>
       <input type="tel" id="numero" placeholder="+351 912 345 678 (P/ validar insira o seu!)" inputmode="tel">
+
+      <label for="pos_caixa">POS (Caixa)</label>
+      <input type="text" id="pos_caixa" placeholder="Digite o número do POS/Caixa">
+
+      <label for="loja">Número da Loja</label>
+      <input type="text" id="loja" placeholder="Digite o número da loja">
     
       <label for="encomenda">Encomenda:</label>
       <input
@@ -61,6 +67,7 @@
 
       <button type="button" class="btn-whatsapp" onclick="gerarMensagem()">Gerar Mensagem</button>
       <button type="button" class="btn-primary" onclick="enviarWhatsApp()">Abrir no WhatsApp</button>
+      <button type="button" class="btn-secondary" onclick="enviarEmail()">Enviar por E-mail</button>
     </form>
 
     <h3>Prévia da Mensagem:</h3>
@@ -100,6 +107,8 @@
     }
 
     function gerarMensagem() {
+      const posCaixa = document.getElementById("pos_caixa").value;
+      const loja = document.getElementById("loja").value;
       const encomenda = document.getElementById("encomenda").value;
       let bloqueio = document.getElementById("bloqueio").value;
       const bloqueioOutro = document.getElementById("bloqueioOutro").value;
@@ -124,6 +133,8 @@
       mensagemGerada =
 `Report Bloqueio
 
+POS (Caixa): ${posCaixa}
+Loja: ${loja}
 Encomenda: ${encomenda}
 Tipo do Bloqueio: ${bloqueio}
 Substituição: ${textoSubstituicao}
@@ -161,6 +172,21 @@ Ticket: ${ticket}`;
       }
       const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensagemGerada)}`;
       window.open(url, "_blank");
+    }
+
+    function enviarEmail() {
+      if (!mensagemGerada) {
+        alert("Gere a mensagem antes de enviar por e-mail!");
+        return;
+      }
+
+      const to = "2370@jeronimo-martins.com";
+      const encomenda = document.getElementById("encomenda").value;
+      const subject = `Report Bloqueio - Encomenda ${encomenda}`;
+      const body = mensagemGerada;
+
+      const mailtoLink = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.open(mailtoLink, "_blank");
     }
 
     document.getElementById("numero").addEventListener("input", function(e) {
