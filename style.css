@@ -5,6 +5,8 @@
   --primary-hover: #0056b3;
   --secondary-color: #25d366;
   --secondary-hover: #1ebe57;
+  --tertiary-color: #6c757d;
+  --tertiary-hover: #5a6268;
   --background-color: #f8f9fa;
   --surface-color: #ffffff;
   --text-color: #212529;
@@ -131,8 +133,11 @@ form button {
 .btn-primary { background-color: var(--primary-color); }
 .btn-primary:hover { background-color: var(--primary-hover); }
 
-.btn-secondary { background-color: var(--secondary-color); }
-.btn-secondary:hover { background-color: var(--secondary-hover); }
+.btn-whatsapp { background-color: var(--secondary-color); }
+.btn-whatsapp:hover { background-color: var(--secondary-hover); }
+
+.btn-secondary { background-color: var(--tertiary-color); }
+.btn-secondary:hover { background-color: var(--tertiary-hover); }
 
 #sacos_container {
   display: none;
