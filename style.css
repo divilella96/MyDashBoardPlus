@@ -1,114 +1,197 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
 
 :root {
-  --primary-color: #007bff;
-  --primary-hover: #0056b3;
-  --secondary-color: #25d366;
-  --secondary-hover: #1ebe57;
-  --background-color: #f8f9fa;
-  --surface-color: #ffffff;
-  --text-color: #212529;
-  --border-color: #dee2e6;
-  --border-radius: 8px;
-  --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --font-family: 'Inter', sans-serif;
+    --primary-color: #007bff;
+    --primary-hover: #0056b3;
+    --secondary-color: #25d366;
+    --secondary-hover: #1ebe57;
+    --background-color: #f8f9fa;
+    --surface-color: #ffffff;
+    --text-color: #212529;
+    --border-color: #dee2e6;
+    --border-radius: 8px;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --font-family: 'Inter', sans-serif;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
 body {
-  font-family: var(--font-family);
-  background-color: var(--background-color);
-  color: var(--text-color);
-  line-height: 1.6;
-  padding: 20px;
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    padding: 20px;
 }
 
 .container {
-  max-width: 600px;
-  margin: 20px auto;
-  background: var(--surface-color);
-  padding: 30px;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+    max-width: 600px;
+    margin: 20px auto;
+    background: var(--surface-color);
+    padding: 30px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-h1, h2 { text-align: center; color: #343a40; }
+h1, h2, h3 {
+    text-align: center;
+    color: #343a40;
+}
+
 h1 { font-size: 1.8rem; }
 h2 { font-size: 1.5rem; }
-
-label {
-  font-weight: 500;
-  font-size: 0.9rem;
-  color: #495057;
+h3 {
+    font-size: 1.2rem;
+    margin-top: 10px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
 }
 
-input, textarea, select {
-  width: 100%;
-  padding: 12px;
-  font-size: 1rem;
-  font-family: var(--font-family);
-  border-radius: var(--border-radius);
-  border: 1px solid var(--border-color);
-  background-color: #fff;
+label {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+input[type="text"],
+input[type="tel"],
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    font-family: var(--font-family);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    background-color: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 input:focus, textarea:focus, select:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
-textarea { resize: vertical; min-height: 120px; }
+textarea {
+    resize: vertical;
+    min-height: 120px;
+}
 
 .checkbox-container {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background-color: #f8f9fa;
-  padding: 12px;
-  border-radius: var(--border-radius);
-  border: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: #f8f9fa;
+    padding: 12px;
+    border-radius: var(--border-radius);
+    border: 1px solid #e9ecef;
 }
 
 input[type="checkbox"] {
-  width: 1.3em;
-  height: 1.3em;
-  accent-color: var(--primary-color);
-  cursor: pointer;
+    width: 1.3em;
+    height: 1.3em;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+}
+
+.checkbox-container label {
+    font-weight: 400;
+    cursor: pointer;
 }
 
 button {
-  padding: 14px 24px;
-  font-size: 1rem;
-  font-weight: 500;
-  color: white;
-  border: none;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
-  width: 100%;
+    padding: 14px 24px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-button:hover { transform: translateY(-2px); }
-button:active { transform: translateY(0); }
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
 
-.btn-primary { background-color: var(--primary-color); }
-.btn-primary:hover { background-color: var(--primary-hover); }
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+}
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-whatsapp {
+    background-color: var(--secondary-color);
+}
+.btn-whatsapp:hover {
+    background-color: var(--secondary-hover);
+}
+
+pre {
+    background: #e9ecef;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.9rem;
+    text-align: left;
+    color: #495057;
+}
+
+small {
+    font-size: 0.85rem;
+    margin-top: -10px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
 
 #sacos_container {
-  display: none;
-  flex-direction: column;
-  gap: 15px;
-  border-top: 1px dashed var(--border-color);
-  padding-top: 15px;
+    display: none;
+    flex-direction: column;
+    gap: 15px;
+    border-top: 1px dashed var(--border-color);
+    padding-top: 15px;
 }
 
 @media (max-width: 640px) {
-  body { padding: 10px; }
-  .container { padding: 20px; margin: 10px auto; gap: 15px; }
-  h1 { font-size: 1.6rem; }
+    body {
+        padding: 10px;
+    }
+    .container {
+        padding: 20px;
+        margin: 10px auto;
+        gap: 15px;
+    }
+    h1 {
+        font-size: 1.6rem;
+    }
 }

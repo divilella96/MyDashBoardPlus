@@ -24,27 +24,43 @@
     }
 
     function getStatusList() {
-      return ["Pending","InAssignment","Open","Invoicing","Processing","Complete","InTransit","Incidence"];
+      return [
+        "Pending",
+        "InAssignment",
+        "Open",
+        "Invoicing",
+        "Processing",
+        "Complete",
+        "InTransit",
+        "Incidence"
+      ];
     }
 
     function getFullStatusList() {
-      return [...getStatusList(),"Cancelled","ManualAssignment"];
+      return [
+        ...getStatusList(),
+        "Cancelled",
+        "ManualAssignment"
+      ];
     }
 
     function abrirOrderManagementRato() {
       const agora = new Date().toISOString();
       const url = new URL("https://perform.lyzer.tech/pt/app/operations/order-management");
+
       url.searchParams.append("dateRange[from]", agora);
       ["191", "190"].forEach(st => url.searchParams.append("serviceTypes", st));
       getStatusList().forEach(status => url.searchParams.append("status", status));
       url.searchParams.append("pageIndex", "1");
       url.searchParams.append("pageSize", "50");
+
       window.open(url.toString(), "_blank");
     }
 
     function abrirLiveOperationsRato() {
       const agora = new Date().toISOString();
       const url = new URL("https://perform.lyzer.tech/pt/app/operations/live-operations");
+
       url.searchParams.append("deliveryDeadline", agora);
       url.searchParams.append("retailer", "29");
       url.searchParams.append("store", "133");
@@ -52,6 +68,7 @@
       getFullStatusList().forEach(status => url.searchParams.append("status", status));
       url.searchParams.append("pageIndex", "1");
       url.searchParams.append("pageSize", "20");
+
       window.open(url.toString(), "_blank");
     }
 

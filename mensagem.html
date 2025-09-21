@@ -33,14 +33,13 @@
         <option>Erro "encomenda em processamento"</option>
         <option>O valor do pedido é superior ao valor permitido</option>
         <option>Erro de duplicidade</option>
-        <option>Artigo inexistente</option>
         <option>Erro descohecido</option>
         <option>Outro (especificar abaixo)</option>
       </select>
 
       <div id="bloqueioOutro" style="display: none;">
-        <label for="bloqueioOutro" class="visually-hidden">Especifique o tipo de bloqueio</label>
-        <input type="text" id="bloqueioOutro" placeholder="Digite o tipo de bloqueio">
+        <label for="bloqueioOutroInput" class="visually-hidden">Especifique o tipo de bloqueio</label>
+        <input type="text" id="bloqueioOutroInput" name="bloqueioOutroInput" placeholder="Digite o tipo de bloqueio">
       </div>
 
       <label for="substituicao">Houve substituição?</label>
@@ -52,8 +51,8 @@
       </select>
 
       <div id="detalhesSubstituicao" style="display: none;">
-        <label for="detalhesSubstituicao" class="visually-hidden">Detalhes da substituição ou nota adicional</label>
-        <textarea id="detalhesSubstituicao" placeholder="Descreva os artigos substituídos ou a nota adicional..."></textarea>
+        <label for="detalhesSubstituicaoInput" class="visually-hidden">Detalhes da substituição ou nota adicional</label>
+        <textarea id="detalhesSubstituicaoInput" name="detalhesSubstituicaoInput" placeholder="Descreva os artigos substituídos ou a nota adicional..."></textarea>
       </div>
 
       <label for="ticket">Ticket</label>
@@ -102,9 +101,9 @@
     function gerarMensagem() {
       const encomenda = document.getElementById("encomenda").value;
       let bloqueio = document.getElementById("bloqueio").value;
-      const bloqueioOutro = document.getElementById("bloqueioOutro").value;
+      const bloqueioOutro = document.getElementById("bloqueioOutroInput").value;
       const substituicao = document.getElementById("substituicao").value;
-      const detalhes = document.getElementById("detalhesSubstituicao").value;
+      const detalhes = document.getElementById("detalhesSubstituicaoInput").value;
       const ticket = document.getElementById("ticket").value;
 
       if (bloqueio === "Outro (especificar abaixo)" && bloqueioOutro.trim() !== "") {
