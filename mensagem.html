@@ -44,9 +44,9 @@
         <option>Outro (especificar abaixo)</option>
       </select>
 
-      <div id="bloqueioOutro" style="display: none;">
-        <label for="bloqueioOutro" class="visually-hidden">Especifique o tipo de bloqueio</label>
-        <input type="text" id="bloqueioOutro" placeholder="Digite o tipo de bloqueio">
+      <div id="bloqueioOutroWrapper" style="display: none;">
+        <label for="bloqueioOutroInput" class="visually-hidden">Especifique o tipo de bloqueio</label>
+        <input type="text" id="bloqueioOutroInput" placeholder="Digite o tipo de bloqueio">
       </div>
 
       <label for="substituicao">Houve substituição?</label>
@@ -57,9 +57,9 @@
         <option>Não teve substituição mas quero adicionar nota/descrição</option>
       </select>
 
-      <div id="detalhesSubstituicao" style="display: none;">
-        <label for="detalhesSubstituicao" class="visually-hidden">Detalhes da substituição ou nota adicional</label>
-        <textarea id="detalhesSubstituicao" placeholder="Descreva os artigos substituídos ou a nota adicional..."></textarea>
+      <div id="detalhesSubstituicaoWrapper" style="display: none;">
+        <label for="detalhesSubstituicaoInput" class="visually-hidden">Detalhes da substituição ou nota adicional</label>
+        <textarea id="detalhesSubstituicaoInput" placeholder="Descreva os artigos substituídos ou a nota adicional..."></textarea>
       </div>
 
       <label for="ticket">Ticket</label>
@@ -81,28 +81,30 @@
 
     function mostrarOutro() {
       const select = document.getElementById("bloqueio");
-      const outroCampo = document.getElementById("bloqueioOutro");
+      const outroCampoWrapper = document.getElementById("bloqueioOutroWrapper");
+      const outroCampoInput = document.getElementById("bloqueioOutro");
       if (select.value === "Outro (especificar abaixo)") {
-        outroCampo.style.display = "block";
-        outroCampo.focus();
+        outroCampoWrapper.style.display = "block";
+        outroCampoInput.focus();
       } else {
-        outroCampo.style.display = "none";
-        outroCampo.value = "";
+        outroCampoWrapper.style.display = "none";
+        outroCampoInput.value = "";
       }
     }
 
     function mostrarDescricaoSubstituicao() {
       const select = document.getElementById("substituicao");
-      const campoDescricao = document.getElementById("detalhesSubstituicao");
+      const campoDescricaoWrapper = document.getElementById("detalhesSubstituicaoWrapper");
+      const campoDescricaoTextarea = document.getElementById("detalhesSubstituicao");
       if (
         select.value === "Sim, teve substituição" ||
         select.value === "Não teve substituição mas quero adicionar nota/descrição"
       ) {
-        campoDescricao.style.display = "block";
-        campoDescricao.focus();
+        campoDescricaoWrapper.style.display = "block";
+        campoDescricaoTextarea.focus();
       } else {
-        campoDescricao.style.display = "none";
-        campoDescricao.value = "";
+        campoDescricaoWrapper.style.display = "none";
+        campoDescricaoTextarea.value = "";
       }
     }
 
@@ -111,9 +113,9 @@
       const loja = document.getElementById("loja").value;
       const encomenda = document.getElementById("encomenda").value;
       let bloqueio = document.getElementById("bloqueio").value;
-      const bloqueioOutro = document.getElementById("bloqueioOutro").value;
+      const bloqueioOutro = document.getElementById("bloqueioOutroInput").value;
       const substituicao = document.getElementById("substituicao").value;
-      const detalhes = document.getElementById("detalhesSubstituicao").value;
+      const detalhes = document.getElementById("detalhesSubstituicaoInput").value;
       const ticket = document.getElementById("ticket").value;
 
       if (bloqueio === "Outro (especificar abaixo)" && bloqueioOutro.trim() !== "") {
