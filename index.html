@@ -35,8 +35,9 @@
       const agora = getLocalISOString(new Date());
       const url = new URL("https://perform.lyzer.tech/pt/app/operations/order-management");
       url.searchParams.append("dateRange[from]", agora);
-      ["191", "190"].forEach(st => url.searchParams.append("serviceTypes", st));
-      getStatusList().forEach(status => url.searchParams.append("status", status));
+      url.searchParams.append("stores", "133");
+      const statuses = ["Pending", "InAssignment", "Open", "Invoicing", "Processing", "Complete", "InTransit", "Incidence"];
+      statuses.forEach(status => url.searchParams.append("status", status));
       url.searchParams.append("pageIndex", "1");
       url.searchParams.append("pageSize", "50");
       window.open(url.toString(), "_blank");
