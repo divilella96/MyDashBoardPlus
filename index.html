@@ -32,9 +32,8 @@
     }
 
     function abrirOrderManagementRato() {
-      const agora = getLocalISOString(new Date());
       const url = new URL("https://perform.lyzer.tech/pt/app/operations/order-management");
-      url.searchParams.append("dateRange[from]", agora);
+      url.searchParams.append("dateRange[from]", "2025-09-22T10:23:08.050");
       url.searchParams.append("stores", "133");
       const statuses = ["Pending", "InAssignment", "Open", "Invoicing", "Processing", "Complete", "InTransit", "Incidence"];
       statuses.forEach(status => url.searchParams.append("status", status));
