@@ -32,14 +32,8 @@
     }
 
     function abrirOrderManagementRato() {
-      const url = new URL("https://perform.lyzer.tech/pt/app/operations/order-management");
-      url.searchParams.append("dateRange[from]", "2025-09-22T10:23:08.050");
-      url.searchParams.append("stores", "133");
-      const statuses = ["Pending", "InAssignment", "Open", "Invoicing", "Processing", "Complete", "InTransit", "Incidence"];
-      statuses.forEach(status => url.searchParams.append("status", status));
-      url.searchParams.append("pageIndex", "1");
-      url.searchParams.append("pageSize", "50");
-      window.open(url.toString(), "_blank");
+      const url = "https://perform.lyzer.tech/pt/app/operations/order-management?dateRange%5Bfrom%5D=2025-09-22T10%3A23%3A08.050&status=Pending&status=InAssignment&status=Open&status=Invoicing&status=Processing&status=Complete&status=InTransit&status=Incidence&stores=133&pageIndex=1&pageSize=50";
+      window.open(url, "_blank");
     }
 
     function abrirLiveOperationsRato() {
