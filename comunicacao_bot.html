@@ -70,7 +70,10 @@
       <h3>Alerta: Preciso de Motorista</h3>
       <form onsubmit="return false;">
         <label for="alert-time">Hora</label>
-        <input type="time" id="alert-time">
+        <button type="button" class="btn-secondary" style="margin-bottom: 5px; width: auto; font-size: 0.8rem; padding: 5px 10px;" onclick="setNextHourAlert()">Hora Atual</button>
+        <select id="alert-time">
+            <option value="">Selecione...</option>
+        </select>
 
         <label>Canal de Envio</label>
         <div class="radio-group">
@@ -85,7 +88,7 @@
       <h3>Outro</h3>
       <form onsubmit="return false;">
         <label for="other-order">Número da encomenda</label>
-        <input type="text" id="other-order" placeholder="Número da encomenda">
+        <input type="text" id="other-order" placeholder="Número da encomenda" maxlength="6" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
 
         <label for="other-desc">Descrição</label>
         <textarea id="other-desc" placeholder="Descrição do problema..."></textarea>
@@ -160,6 +163,7 @@
     function populateTimeSelects() {
       const startSelect = document.getElementById('time-start');
       const endSelect = document.getElementById('time-end');
+      const alertSelect = document.getElementById('alert-time');
 
       // Populate 00:00 to 23:30
       for (let h = 0; h < 24; h++) {
@@ -177,6 +181,11 @@
           optionEnd.value = time;
           optionEnd.text = time;
           endSelect.appendChild(optionEnd);
+
+          const optionAlert = document.createElement('option');
+          optionAlert.value = time;
+          optionAlert.text = time;
+          alertSelect.appendChild(optionAlert);
         }
       }
     }
@@ -210,7 +219,7 @@
     // Call populate on load
     window.onload = populateTimeSelects;
 
-    function setNextHour() {
+    function calculateNextSlot() {
       const now = new Date();
       let hours = now.getHours();
       let minutes = now.getMinutes();
@@ -227,13 +236,22 @@
 
       const startHour = String(hours).padStart(2, '0');
       const startMinute = String(minutes).padStart(2, '0');
-      const startTime = `${startHour}:${startMinute}`;
+      return `${startHour}:${startMinute}`;
+    }
 
+    function setNextHour() {
+      const startTime = calculateNextSlot();
       const startSelect = document.getElementById('time-start');
       startSelect.value = startTime;
 
       // Update end time automatically
       updateEndTime();
+    }
+
+    function setNextHourAlert() {
+      const startTime = calculateNextSlot();
+      const alertSelect = document.getElementById('alert-time');
+      alertSelect.value = startTime;
     }
 
     function getMessageData() {
@@ -299,6 +317,11 @@
 
         if (!order) {
             alert("Por favor, preencha o número da encomenda.");
+            return { isValid: false };
+        }
+
+        if (order.length !== 6 || !/^\d+$/.test(order)) {
+            alert(`A encomenda ${order} deve ter exatamente 6 dígitos numéricos.`);
             return { isValid: false };
         }
         if (!description) {
