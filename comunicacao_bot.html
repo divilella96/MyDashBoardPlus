@@ -20,8 +20,8 @@
     <div id="reagendamento" class="flow-section">
       <h3>Reagendamento</h3>
       <form onsubmit="return false;">
-        <label>Número de telefone (Bot)</label>
-        <input type="text" value="+1 (555) 884-1462" readonly>
+        <!-- Phone hidden as requested -->
+        <input type="hidden" id="bot-phone" value="+15558841462">
 
         <label>Encomendas</label>
         <div id="order-list">
@@ -94,7 +94,10 @@
     </div>
 
     <div class="output-section" id="output-section" style="display:none;">
-      <button class="btn-primary" onclick="generateMessage()">Gerar Mensagem</button>
+      <div style="display:flex; gap:10px;">
+        <button class="btn-primary" onclick="generateAndSend()">Enviar</button>
+        <button class="btn-secondary" onclick="generateAndShow()">Gerar Mensagem (Visualizar)</button>
+      </div>
 
       <label for="final-message">Mensagem Gerada</label>
       <textarea id="final-message" readonly placeholder="A mensagem aparecerá aqui..."></textarea>
@@ -164,8 +167,11 @@
       }
     }
 
-    function generateMessage() {
-      let message = '';
+    function getMessageData() {
+      let subject = '';
+      let body = '';
+      let channel = '';
+      let isValid = true;
 
       if (currentFlow === 'reagendamento') {
         const ordersList = Array.from(document.querySelectorAll('.order-input'))
@@ -174,7 +180,7 @@
 
         if (ordersList.length === 0) {
             alert("Por favor, adicione pelo menos uma encomenda.");
-            return;
+            return { isValid: false };
         }
 
         const orders = ordersList.join(', ');
@@ -183,18 +189,19 @@
 
         if (!startTime || !endTime) {
             alert("Por favor, preencha a janela de horário.");
-            return;
+            return { isValid: false };
         }
 
         const timeWindow = `${startTime} às ${endTime}`;
-
         const contactType = document.querySelector('input[name="contact-type"]:checked').value;
-        const channel = document.querySelector('input[name="channel-reag"]:checked').value;
+        channel = document.querySelector('input[name="channel-reag"]:checked').value;
 
-        if (channel === 'E-mail') {
-            message = `Assunto: \nReagendamento de Entrega\n\nMensagem:\nOlá, tudo bem?\n\nReferente à(s) encomenda(s): ${orders},\ninformamos que o novo horário previsto é às ${timeWindow}.\n\nEste contato está sendo realizado via ${contactType}.\n\nFicamos no aguardo da sua confirmação.\n\nObrigado.`;
-        } else { // WhatsApp
-            message = `Reagendamento de Entrega\nReferente à(s) encomenda(s): ${orders},\ninformamos que o novo horário previsto é às ${timeWindow}.\n\nEste contato está sendo realizado via ${contactType}.\n\nFicamos no aguardo da sua confirmação.\n\nObrigado.`;
+        subject = `Reagendamento de Entrega`;
+        body = `Olá, tudo bem?\n\nReferente à(s) encomenda(s): ${orders},\ninformamos que o novo horário previsto é às ${timeWindow}.\n\nEste contato está sendo realizado via ${contactType}.\n\nFicamos no aguardo da sua confirmação.\n\nObrigado.`;
+
+        if (channel === 'WhatsApp') {
+            // For WhatsApp, usually just the body text is used, optionally subject as first line
+            body = `*${subject}*\n${body}`;
         }
 
       } else if (currentFlow === 'alerta') {
@@ -202,16 +209,12 @@
 
         if (!time) {
             alert("Por favor, preencha a hora.");
-            return;
+            return { isValid: false };
         }
 
-        const channel = document.querySelector('input[name="channel-alert"]:checked').value;
-
-        if (channel === 'E-mail') {
-            message = `Assunto:\nAlerta Operacional\n\nMensagem:\nPreciso de motorista às ${time}.\nSolicito apoio urgente.`;
-        } else { // WhatsApp
-            message = `Preciso de motorista às ${time}.\nSolicito apoio urgente.`;
-        }
+        channel = document.querySelector('input[name="channel-alert"]:checked').value;
+        subject = `Alerta Operacional`;
+        body = `Preciso de motorista às ${time}.\nSolicito apoio urgente.`;
 
       } else if (currentFlow === 'outro') {
         const order = document.getElementById('other-order').value.trim();
@@ -219,23 +222,55 @@
 
         if (!order) {
             alert("Por favor, preencha o número da encomenda.");
-            return;
+            return { isValid: false };
         }
         if (!description) {
             alert("Por favor, preencha a descrição.");
-            return;
+            return { isValid: false };
         }
 
-        const channel = document.querySelector('input[name="channel-other"]:checked').value;
-
-        if (channel === 'E-mail') {
-             message = `Assunto:\nAlerta Operacional | ${order}\n\nMensagem:\n${order}\n${description}`;
-        } else { // WhatsApp
-             message = `${order}\n${description}`;
-        }
+        channel = document.querySelector('input[name="channel-other"]:checked').value;
+        subject = `Alerta Operacional | ${order}`;
+        body = `${order}\n${description}`;
       }
 
-      document.getElementById('final-message').value = message;
+      return { isValid, subject, body, channel };
+    }
+
+    function generateAndShow() {
+      const data = getMessageData();
+      if (!data.isValid) return;
+
+      let fullMessage = '';
+      if (data.channel === 'E-mail') {
+          fullMessage = `Assunto:\n${data.subject}\n\nMensagem:\n${data.body}`;
+      } else {
+          fullMessage = data.body;
+      }
+      document.getElementById('final-message').value = fullMessage;
+    }
+
+    function generateAndSend() {
+      const data = getMessageData();
+      if (!data.isValid) return;
+
+      // Update the textarea so the user can see what was sent
+      generateAndShow();
+
+      if (data.channel === 'WhatsApp') {
+        // Use the hidden phone input value which is cleaned
+        // Or hardcode as per request: +1 (555) 884-1462 -> 15558841462
+        // If currentFlow is Reagendamento, use that phone. For others, it wasn't specified but likely same bot?
+        // Actually, the prompt says "O número de telefone será sempre o mesmo que já informei anteriormente."
+        // So we use 15558841462 for all WhatsApp flows.
+        const phone = "15558841462";
+        const url = `https://wa.me/${phone}?text=${encodeURIComponent(data.body)}`;
+        window.open(url, '_blank');
+      } else if (data.channel === 'E-mail') {
+        const to = "help@lyzer.pt";
+        const url = `mailto:${to}?subject=${encodeURIComponent(data.subject)}&body=${encodeURIComponent(data.body)}`;
+        window.open(url, '_blank');
+      }
     }
 
     function copyMessage() {
