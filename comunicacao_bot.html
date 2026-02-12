@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comunicação Com Bot</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Comunicação Com Bot</h1>
+
+    <div class="menu-buttons">
+      <button class="btn-primary" onclick="showFlow('reagendamento')">Reagendamento</button>
+      <button class="btn-primary" onclick="showFlow('alerta')">Alerta: Preciso de Motorista</button>
+      <button class="btn-primary" onclick="showFlow('outro')">Outro</button>
+    </div>
+
+    <!-- FLUXO 1: REAGENDAMENTO -->
+    <div id="reagendamento" class="flow-section">
+      <h3>Reagendamento</h3>
+      <form onsubmit="return false;">
+        <label>Número de telefone (Bot)</label>
+        <input type="text" value="+1 (555) 884-1462" readonly>
+
+        <label>Encomendas</label>
+        <div id="order-list">
+          <div class="order-input-group">
+            <input type="text" class="order-input" placeholder="Número da encomenda">
+            <!-- First one typically doesn't have remove button unless we want to allow 0 orders, but usually at least 1 is needed.
+                 Let's add remove button even for the first one for consistency, but maybe handle logic to not remove if it's the only one?
+                 Or just let it be empty. -->
+          </div>
+        </div>
+        <button class="btn-add" onclick="addOrderField()">+ Adicionar Encomenda</button>
+
+        <label>Janela de Horário</label>
+        <div class="time-inputs">
+            <div>
+                <label for="time-start" style="margin-top:0; font-size: 0.8rem;">Início</label>
+                <input type="time" id="time-start" onchange="updateEndTime()">
+            </div>
+            <div>
+                <label for="time-end" style="margin-top:0; font-size: 0.8rem;">Fim</label>
+                <input type="time" id="time-end">
+            </div>
+        </div>
+
+        <label>Tipo de Contato</label>
+        <div class="radio-group">
+          <label><input type="radio" name="contact-type" value="SMS" checked> SMS</label>
+          <label><input type="radio" name="contact-type" value="Ligação"> Ligação</label>
+        </div>
+
+        <label>Canal de Envio</label>
+        <div class="radio-group">
+          <label><input type="radio" name="channel-reag" value="WhatsApp" checked> WhatsApp</label>
+          <label><input type="radio" name="channel-reag" value="E-mail"> E-mail</label>
+        </div>
+      </form>
+    </div>
+
+    <!-- FLUXO 2: ALERTA -->
+    <div id="alerta" class="flow-section">
+      <h3>Alerta: Preciso de Motorista</h3>
+      <form onsubmit="return false;">
+        <label for="alert-time">Hora</label>
+        <input type="time" id="alert-time">
+
+        <label>Canal de Envio</label>
+        <div class="radio-group">
+          <label><input type="radio" name="channel-alert" value="WhatsApp" checked> WhatsApp</label>
+          <label><input type="radio" name="channel-alert" value="E-mail"> E-mail</label>
+        </div>
+      </form>
+    </div>
+
+    <!-- FLUXO 3: OUTRO -->
+    <div id="outro" class="flow-section">
+      <h3>Outro</h3>
+      <form onsubmit="return false;">
+        <label for="other-order">Número da encomenda</label>
+        <input type="text" id="other-order" placeholder="Número da encomenda">
+
+        <label for="other-desc">Descrição</label>
+        <textarea id="other-desc" placeholder="Descrição do problema..."></textarea>
+
+        <label>Canal de Envio</label>
+        <div class="radio-group">
+            <label><input type="radio" name="channel-other" value="WhatsApp" checked> WhatsApp</label>
+            <label><input type="radio" name="channel-other" value="E-mail"> E-mail</label>
+        </div>
+      </form>
+    </div>
+
+    <div class="output-section" id="output-section" style="display:none;">
+      <button class="btn-primary" onclick="generateMessage()">Gerar Mensagem</button>
+
+      <label for="final-message">Mensagem Gerada</label>
+      <textarea id="final-message" readonly placeholder="A mensagem aparecerá aqui..."></textarea>
+
+      <button class="btn-secondary" onclick="copyMessage()">Copiar Mensagem</button>
+      <div id="copy-feedback" style="margin-top: 10px; color: green; display: none;">Copiado!</div>
+    </div>
+
+  </div>
+
+  <script>
+    let currentFlow = '';
+
+    function showFlow(flowId) {
+      // Hide all flows
+      document.querySelectorAll('.flow-section').forEach(el => el.classList.remove('active'));
+
+      // Show selected flow
+      document.getElementById(flowId).classList.add('active');
+
+      // Show output section
+      document.getElementById('output-section').style.display = 'block';
+
+      currentFlow = flowId;
+
+      // Clear previous message
+      document.getElementById('final-message').value = '';
+    }
+
+    function addOrderField() {
+      const container = document.getElementById('order-list');
+      const div = document.createElement('div');
+      div.className = 'order-input-group';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'order-input';
+      input.placeholder = 'Número da encomenda';
+
+      const btn = document.createElement('button');
+      btn.className = 'btn-remove';
+      btn.textContent = 'X';
+      btn.onclick = function() {
+        container.removeChild(div);
+      };
+
+      div.appendChild(input);
+      div.appendChild(btn);
+      container.appendChild(div);
+    }
+
+    function updateEndTime() {
+      const startTime = document.getElementById('time-start').value;
+      if (startTime) {
+        const [hours, minutes] = startTime.split(':').map(Number);
+        const date = new Date();
+        date.setHours(hours);
+        date.setMinutes(minutes);
+
+        // Add 1 hour
+        date.setHours(date.getHours() + 1);
+
+        const newHours = String(date.getHours()).padStart(2, '0');
+        const newMinutes = String(date.getMinutes()).padStart(2, '0');
+
+        document.getElementById('time-end').value = `${newHours}:${newMinutes}`;
+      }
+    }
+
+    function generateMessage() {
+      let message = '';
+
+      if (currentFlow === 'reagendamento') {
+        const ordersList = Array.from(document.querySelectorAll('.order-input'))
+                            .map(input => input.value.trim())
+                            .filter(val => val !== '');
+
+        if (ordersList.length === 0) {
+            alert("Por favor, adicione pelo menos uma encomenda.");
+            return;
+        }
+
+        const orders = ordersList.join(', ');
+        const startTime = document.getElementById('time-start').value;
+        const endTime = document.getElementById('time-end').value;
+
+        if (!startTime || !endTime) {
+            alert("Por favor, preencha a janela de horário.");
+            return;
+        }
+
+        const timeWindow = `${startTime} às ${endTime}`;
+
+        const contactType = document.querySelector('input[name="contact-type"]:checked').value;
+        const channel = document.querySelector('input[name="channel-reag"]:checked').value;
+
+        if (channel === 'E-mail') {
+            message = `Assunto: \nReagendamento de Entrega\n\nMensagem:\nOlá, tudo bem?\n\nReferente à(s) encomenda(s): ${orders},\ninformamos que o novo horário previsto é às ${timeWindow}.\n\nEste contato está sendo realizado via ${contactType}.\n\nFicamos no aguardo da sua confirmação.\n\nObrigado.`;
+        } else { // WhatsApp
+            message = `Reagendamento de Entrega\nReferente à(s) encomenda(s): ${orders},\ninformamos que o novo horário previsto é às ${timeWindow}.\n\nEste contato está sendo realizado via ${contactType}.\n\nFicamos no aguardo da sua confirmação.\n\nObrigado.`;
+        }
+
+      } else if (currentFlow === 'alerta') {
+        const time = document.getElementById('alert-time').value;
+
+        if (!time) {
+            alert("Por favor, preencha a hora.");
+            return;
+        }
+
+        const channel = document.querySelector('input[name="channel-alert"]:checked').value;
+
+        if (channel === 'E-mail') {
+            message = `Assunto:\nAlerta Operacional\n\nMensagem:\nPreciso de motorista às ${time}.\nSolicito apoio urgente.`;
+        } else { // WhatsApp
+            message = `Preciso de motorista às ${time}.\nSolicito apoio urgente.`;
+        }
+
+      } else if (currentFlow === 'outro') {
+        const order = document.getElementById('other-order').value.trim();
+        const description = document.getElementById('other-desc').value.trim();
+
+        if (!order) {
+            alert("Por favor, preencha o número da encomenda.");
+            return;
+        }
+        if (!description) {
+            alert("Por favor, preencha a descrição.");
+            return;
+        }
+
+        const channel = document.querySelector('input[name="channel-other"]:checked').value;
+
+        if (channel === 'E-mail') {
+             message = `Assunto:\nAlerta Operacional | ${order}\n\nMensagem:\n${order}\n${description}`;
+        } else { // WhatsApp
+             message = `${order}\n${description}`;
+        }
+      }
+
+      document.getElementById('final-message').value = message;
+    }
+
+    function copyMessage() {
+      const copyText = document.getElementById("final-message");
+      copyText.select();
+      copyText.setSelectionRange(0, 99999); /* For mobile devices */
+
+      navigator.clipboard.writeText(copyText.value).then(() => {
+        const feedback = document.getElementById('copy-feedback');
+        feedback.style.display = 'block';
+        setTimeout(() => {
+            feedback.style.display = 'none';
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
