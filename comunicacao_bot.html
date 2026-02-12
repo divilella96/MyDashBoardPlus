@@ -38,11 +38,15 @@
         <div class="time-inputs">
             <div>
                 <label for="time-start" style="margin-top:0; font-size: 0.8rem;">Início</label>
-                <input type="time" id="time-start" onchange="updateEndTime()">
+                <select id="time-start" onchange="updateEndTime()">
+                    <option value="">Selecione...</option>
+                </select>
             </div>
             <div>
                 <label for="time-end" style="margin-top:0; font-size: 0.8rem;">Fim</label>
-                <input type="time" id="time-end">
+                <select id="time-end">
+                    <option value="">Selecione...</option>
+                </select>
             </div>
         </div>
 
@@ -149,23 +153,58 @@
       container.appendChild(div);
     }
 
-    function updateEndTime() {
-      const startTime = document.getElementById('time-start').value;
-      if (startTime) {
-        const [hours, minutes] = startTime.split(':').map(Number);
-        const date = new Date();
-        date.setHours(hours);
-        date.setMinutes(minutes);
+    function populateTimeSelects() {
+      const startSelect = document.getElementById('time-start');
+      const endSelect = document.getElementById('time-end');
 
-        // Add 1 hour
-        date.setHours(date.getHours() + 1);
+      // Populate 00:00 to 23:30
+      for (let h = 0; h < 24; h++) {
+        for (let m = 0; m < 60; m += 30) {
+          const hour = String(h).padStart(2, '0');
+          const minute = String(m).padStart(2, '0');
+          const time = `${hour}:${minute}`;
 
-        const newHours = String(date.getHours()).padStart(2, '0');
-        const newMinutes = String(date.getMinutes()).padStart(2, '0');
+          const optionStart = document.createElement('option');
+          optionStart.value = time;
+          optionStart.text = time;
+          startSelect.appendChild(optionStart);
 
-        document.getElementById('time-end').value = `${newHours}:${newMinutes}`;
+          const optionEnd = document.createElement('option');
+          optionEnd.value = time;
+          optionEnd.text = time;
+          endSelect.appendChild(optionEnd);
+        }
       }
     }
+
+    function updateEndTime() {
+      const startSelect = document.getElementById('time-start');
+      const endSelect = document.getElementById('time-end');
+      const startTime = startSelect.value;
+
+      if (startTime) {
+        const [hours, minutes] = startTime.split(':').map(Number);
+
+        // Calculate end time (+1 hour)
+        let endHour = hours + 1;
+        let endMinute = minutes;
+
+        // Handle overflow (24:00 -> 00:00) if needed, but typically end time can be next day.
+        // For simplicity, let's wrap around 24h
+        if (endHour >= 24) {
+            endHour -= 24;
+        }
+
+        const endTimeStr = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
+
+        // Try to select the calculated end time if it exists in options
+        // It should exist as we populated all 30min intervals
+        endSelect.value = endTimeStr;
+      }
+    }
+
+    // Call populate on load
+    window.onload = populateTimeSelects;
 
     function getMessageData() {
       let subject = '';
