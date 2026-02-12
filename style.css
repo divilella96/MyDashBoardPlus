@@ -152,3 +152,75 @@ form button {
   .container { padding: 20px; margin: 10px auto; gap: 15px; }
   h1 { font-size: 1.6rem; }
 }
+
+/* Communication Bot Styles */
+.menu-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.flow-section {
+  display: none;
+  border-top: 1px solid var(--border-color);
+  padding-top: 20px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+.flow-section.active {
+  display: block;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.order-input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.btn-remove {
+  background-color: #dc3545;
+  color: white;
+  padding: 10px 15px;
+  font-size: 0.9rem;
+  width: auto;
+}
+.btn-remove:hover {
+  background-color: #c82333;
+}
+.btn-add {
+  background-color: #28a745;
+  width: auto;
+  margin-bottom: 15px;
+}
+.btn-add:hover {
+    background-color: #218838;
+}
+.radio-group {
+  display: flex;
+  gap: 20px;
+  margin-top: 5px;
+}
+.radio-group label {
+  margin-top: 0;
+  font-weight: normal;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+.radio-group input[type="radio"] {
+    width: auto;
+}
+.output-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+.time-inputs {
+    display: flex;
+    gap: 10px;
+}
+.time-inputs > div {
+    flex: 1;
+}
