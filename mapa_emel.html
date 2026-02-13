@@ -5,8 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Validação Mapa EMEL</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+
   <style>
-    .map-container {
+    /* Map Container */
+    #map {
+      height: 400px;
+      width: 100%;
+      border-radius: 8px;
+      margin-top: 20px;
+      border: 1px solid #ddd;
+      z-index: 1;
+    }
+
+    .map-container-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 15px;
@@ -18,6 +34,7 @@
       border-radius: 8px;
       background-color: #fff;
       transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
     }
     .zone-card:hover {
       transform: translateY(-2px);
@@ -107,51 +124,262 @@
     <h1>Validação Mapa EMEL</h1>
 
     <div class="search-section">
-      <input type="text" id="streetInput" placeholder="Digite o nome da rua..." onkeyup="filterMap()">
+      <input type="text" id="streetInput" placeholder="Digite o nome da rua ou Código Postal..." onkeyup="filterMap()">
       <button class="btn-primary" onclick="validateStreet()">Validar</button>
       <button class="btn-secondary" onclick="window.close()">Fechar</button>
     </div>
 
     <div id="validationResult" class="result-display"></div>
 
-    <h2>Mapa Virtual (Zonas)</h2>
-    <div id="virtualMap" class="map-container"></div>
+    <h2>Mapa Digital</h2>
+    <div id="map"></div>
 
-    <h2>Mapa Estático</h2>
+    <h2>Lista de Ruas (Zonas)</h2>
+    <div id="virtualMap" class="map-container-grid"></div>
+
+    <h2>Mapa Estático (Referência)</h2>
     <img src="mapa_emel.png" alt="Mapa EMEL" class="static-map-img">
   </div>
 
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
   <script>
+    // Enriched Data with Lat/Lon
     const emelData = [
-      { "rua": "Rua do Pau de Bandeira", "numero": "20", "cp": "1200-758", "zona_azul": true, "motivo": "Santos-o-Velho / Faixa ribeirinha de acesso difícil (Zona 1)" },
-      { "rua": "Largo do Terreiro do Trigo", "numero": "13", "cp": "1100-603", "zona_azul": true, "motivo": "Alfama / Santa Apolónia / Faixa ribeirinha plana (Zona 2)" },
-      { "rua": "Rua da Imprensa Nacional", "numero": "N/A", "cp": "1250-124", "zona_azul": false, "motivo": "Príncipe Real / Cota Alta" },
-      { "rua": "Rua Santa Marinha", "numero": "5", "cp": "1100-490", "zona_azul": false, "motivo": "Graça / São Vicente / Cota Alta" },
-      { "rua": "Rua da Cruz dos Poiais", "numero": "49", "cp": "1200-320", "zona_azul": false, "motivo": "São Bento / Misericórdia / Cota Alta" },
-      { "rua": "Rua Arriaga", "numero": "33", "cp": "1200-734", "zona_azul": false, "motivo": "Janelas Verdes (Oeste) / Fora do limite / Via de distribuição" },
-      { "rua": "Rua de São Caetano", "numero": "6 e 41", "cp": "1200-829", "zona_azul": false, "motivo": "Lapa / Zona Residencial / Cota Alta" },
-      { "rua": "Travessa do Arco a Jesus", "numero": "16 e 17", "cp": "1200-029", "zona_azul": false, "motivo": "Bairro Alto / Mercês / Cota Alta" },
-      { "rua": "Rua de O Século", "numero": "N/A", "cp": "1200-433", "zona_azul": false, "motivo": "Príncipe Real / Bairro Alto / Cota Alta" },
-      { "rua": "Rua do Quelhas", "numero": "N/A", "cp": "1200-779", "zona_azul": false, "motivo": "Lapa / Madragoa / Encosta" },
-      { "rua": "Rua do Olival", "numero": "116", "cp": "1200-743", "zona_azul": false, "motivo": "Lapa / Janelas Verdes / Encosta Alta" },
-      { "rua": "Rua de Entremuros do Mirante", "numero": "43A", "cp": "1100-210", "zona_azul": false, "motivo": "Castelo / São Vicente / Cota Alta" },
-      { "rua": "Rua das Flores", "numero": "74", "cp": "1200-195", "zona_azul": false, "motivo": "Chiado / Encosta a subir para a cidade alta" },
-      { "rua": "Rua da Padaria", "numero": "22", "cp": "1100-389", "zona_azul": false, "motivo": "Baixa / Sé (Zona central excluída)" },
-      { "rua": "Rua da Bela Vista à Lapa", "numero": "17A", "cp": "1200-612", "zona_azul": false, "motivo": "Lapa / Cota Alta" },
-      { "rua": "Rua da Madalena", "numero": "N/A", "cp": "1100-319", "zona_azul": false, "motivo": "Baixa Pombalina (Zona central excluída)" },
-      { "rua": "Rua Professor Branco Rodrigues", "numero": "28", "cp": "1200-363", "zona_azul": false, "motivo": "Santo António / Rato / Cota Alta" },
-      { "rua": "Rua de Campo de Ourique", "numero": "57", "cp": "1250-060", "zona_azul": false, "motivo": "Campo de Ourique / Amoreiras / Planalto" },
-      { "rua": "Travessa dos Inglesinhos", "numero": "27", "cp": "1200-222", "zona_azul": false, "motivo": "Bairro Alto / Cota Alta" }
+      {
+        "rua": "Rua do Pau de Bandeira",
+        "numero": "20",
+        "cp": "1200-758",
+        "zona_azul": true,
+        "motivo": "Santos-o-Velho / Faixa ribeirinha de acesso difícil (Zona 1)",
+        "lat": "38.7081129",
+        "lon": "-9.1651522"
+      },
+      {
+        "rua": "Largo do Terreiro do Trigo",
+        "numero": "13",
+        "cp": "1100-603",
+        "zona_azul": true,
+        "motivo": "Alfama / Santa Apolónia / Faixa ribeirinha plana (Zona 2)",
+        "lat": "38.7223",
+        "lon": "-9.1393"
+      },
+      {
+        "rua": "Rua da Imprensa Nacional",
+        "numero": "N/A",
+        "cp": "1250-124",
+        "zona_azul": false,
+        "motivo": "Príncipe Real / Cota Alta",
+        "lat": "38.7161602",
+        "lon": "-9.1534106"
+      },
+      {
+        "rua": "Rua Santa Marinha",
+        "numero": "5",
+        "cp": "1100-490",
+        "zona_azul": false,
+        "motivo": "Graça / São Vicente / Cota Alta",
+        "lat": "38.7144225",
+        "lon": "-9.1303257"
+      },
+      {
+        "rua": "Rua da Cruz dos Poiais",
+        "numero": "49",
+        "cp": "1200-320",
+        "zona_azul": false,
+        "motivo": "São Bento / Misericórdia / Cota Alta",
+        "lat": "38.7119063",
+        "lon": "-9.1514243"
+      },
+      {
+        "rua": "Rua Arriaga",
+        "numero": "33",
+        "cp": "1200-734",
+        "zona_azul": false,
+        "motivo": "Janelas Verdes (Oeste) / Fora do limite / Via de distribuição",
+        "lat": "38.7028352",
+        "lon": "-9.2281675"
+      },
+      {
+        "rua": "Rua de São Caetano",
+        "numero": "6 e 41",
+        "cp": "1200-829",
+        "zona_azul": false,
+        "motivo": "Lapa / Zona Residencial / Cota Alta",
+        "lat": "38.7076205",
+        "lon": "-9.1654022"
+      },
+      {
+        "rua": "Travessa do Arco a Jesus",
+        "numero": "16 e 17",
+        "cp": "1200-029",
+        "zona_azul": false,
+        "motivo": "Bairro Alto / Mercês / Cota Alta",
+        "lat": "38.7136686",
+        "lon": "-9.1494087"
+      },
+      {
+        "rua": "Rua de O Século",
+        "numero": "N/A",
+        "cp": "1200-433",
+        "zona_azul": false,
+        "motivo": "Príncipe Real / Bairro Alto / Cota Alta",
+        "lat": "38.7135485",
+        "lon": "-9.1475477"
+      },
+      {
+        "rua": "Rua do Quelhas",
+        "numero": "N/A",
+        "cp": "1200-779",
+        "zona_azul": false,
+        "motivo": "Lapa / Madragoa / Encosta",
+        "lat": "38.7097668",
+        "lon": "-9.1568628"
+      },
+      {
+        "rua": "Rua do Olival",
+        "numero": "116",
+        "cp": "1200-743",
+        "zona_azul": false,
+        "motivo": "Lapa / Janelas Verdes / Encosta Alta",
+        "lat": "38.7048770",
+        "lon": "-9.1640284"
+      },
+      {
+        "rua": "Rua de Entremuros do Mirante",
+        "numero": "43A",
+        "cp": "1100-210",
+        "zona_azul": false,
+        "motivo": "Castelo / São Vicente / Cota Alta",
+        "lat": "38.7223",
+        "lon": "-9.1393"
+      },
+      {
+        "rua": "Rua das Flores",
+        "numero": "74",
+        "cp": "1200-195",
+        "zona_azul": false,
+        "motivo": "Chiado / Encosta a subir para a cidade alta",
+        "lat": "38.7092009",
+        "lon": "-9.1435384"
+      },
+      {
+        "rua": "Rua da Padaria",
+        "numero": "22",
+        "cp": "1100-389",
+        "zona_azul": false,
+        "motivo": "Baixa / Sé (Zona central excluída)",
+        "lat": "38.7099140",
+        "lon": "-9.1345023"
+      },
+      {
+        "rua": "Rua da Bela Vista à Lapa",
+        "numero": "17A",
+        "cp": "1200-612",
+        "zona_azul": false,
+        "motivo": "Lapa / Cota Alta",
+        "lat": "38.7120543",
+        "lon": "-9.1588828"
+      },
+      {
+        "rua": "Rua da Madalena",
+        "numero": "N/A",
+        "cp": "1100-319",
+        "zona_azul": false,
+        "motivo": "Baixa Pombalina (Zona central excluída)",
+        "lat": "38.7116855",
+        "lon": "-9.1358057"
+      },
+      {
+        "rua": "Rua Professor Branco Rodrigues",
+        "numero": "28",
+        "cp": "1200-363",
+        "zona_azul": false,
+        "motivo": "Santo António / Rato / Cota Alta",
+        "lat": "38.7155478",
+        "lon": "-9.1509139"
+      },
+      {
+        "rua": "Rua de Campo de Ourique",
+        "numero": "57",
+        "cp": "1250-060",
+        "zona_azul": false,
+        "motivo": "Campo de Ourique / Amoreiras / Planalto",
+        "lat": "38.7206549",
+        "lon": "-9.1626741"
+      },
+      {
+        "rua": "Travessa dos Inglesinhos",
+        "numero": "27",
+        "cp": "1200-222",
+        "zona_azul": false,
+        "motivo": "Bairro Alto / Cota Alta",
+        "lat": "38.7127880",
+        "lon": "-9.1458355"
+      }
     ];
 
-    function renderMap(filterText = "") {
+    let map;
+    let markers = [];
+
+    function initMap() {
+      // Default center (Lisbon)
+      map = L.map('map').setView([38.71667, -9.13333], 14);
+
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(map);
+
+      renderMarkers(emelData);
+    }
+
+    function renderMarkers(data) {
+      // Clear existing markers
+      markers.forEach(m => map.removeLayer(m));
+      markers = [];
+
+      data.forEach(item => {
+        if (item.lat && item.lon) {
+          const lat = parseFloat(item.lat);
+          const lon = parseFloat(item.lon);
+
+          // Determine marker color (using standard Leaflet icons with filter via CSS usually,
+          // but here we'll just use popup text or custom icons if possible.
+          // For simplicity, standard blue pin for all, but popup indicates status).
+
+          // Simple distinction: We can't easily change marker color without custom icon assets.
+          // We'll rely on the popup content.
+          const statusText = item.zona_azul ? "ZONA AZUL" : "Fora da Zona Azul";
+          const statusColor = item.zona_azul ? "blue" : "grey";
+
+          const marker = L.marker([lat, lon]).addTo(map);
+          marker.bindPopup(`
+            <b>${item.rua}</b><br>
+            ${item.cp}<br>
+            <strong style="color: ${statusColor}">${statusText}</strong><br>
+            ${item.motivo}
+          `);
+
+          markers.push(marker);
+        }
+      });
+
+      // Fit bounds if we have markers
+      if (markers.length > 0) {
+        const group = new L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.1));
+      }
+    }
+
+    function renderCards(filterText = "") {
       const container = document.getElementById('virtualMap');
       container.innerHTML = "";
 
-      const filteredData = emelData.filter(item =>
-        item.rua.toLowerCase().includes(filterText.toLowerCase()) ||
-        item.motivo.toLowerCase().includes(filterText.toLowerCase())
-      );
+      const filteredData = filterData(filterText);
 
       if (filteredData.length === 0) {
         container.innerHTML = "<p>Nenhuma rua encontrada.</p>";
@@ -172,8 +400,28 @@
           <div class="card-detail"><strong>Motivo:</strong> ${item.motivo}</div>
           <span class="card-badge ${badgeClass}">${badgeText}</span>
         `;
+
+        // Add click event to focus on map
+        card.onclick = () => {
+             if(item.lat && item.lon) {
+                 map.setView([item.lat, item.lon], 18);
+                 // Find and open popup
+                 // (Simplified: Re-rendering markers cleans this up usually, but here we just zoom)
+             }
+        };
+
         container.appendChild(card);
       });
+    }
+
+    function filterData(input) {
+        if (!input) return emelData;
+        const lowerInput = input.toLowerCase();
+        return emelData.filter(item =>
+            item.rua.toLowerCase().includes(lowerInput) ||
+            item.motivo.toLowerCase().includes(lowerInput) ||
+            item.cp.includes(input) // Check CP
+        );
     }
 
     function validateStreet() {
@@ -183,37 +431,58 @@
       if (!input) {
         resultDiv.style.display = 'block';
         resultDiv.className = 'result-display result-error';
-        resultDiv.textContent = "Por favor, digite o nome de uma rua.";
+        resultDiv.textContent = "Por favor, digite o nome de uma rua ou código postal.";
+        // Reset view
+        renderMarkers(emelData);
+        renderCards("");
         return;
       }
 
-      const found = emelData.find(item => item.rua.toLowerCase().includes(input.toLowerCase()));
+      // Logic change: "Validate" usually implies checking if a SPECIFIC input is valid.
+      // But we are also filtering. Let's find the BEST match or show filtering results.
+      // If the user types a full CP, we might get multiple streets.
+
+      const matches = filterData(input);
 
       resultDiv.style.display = 'block';
-      if (found) {
-        if (found.zona_azul) {
-          resultDiv.className = 'result-display result-success';
-          resultDiv.innerHTML = `<strong>${found.rua}</strong> está na <strong>ZONA AZUL</strong>.<br>Motivo: ${found.motivo}`;
+      if (matches.length > 0) {
+        if (matches.length === 1) {
+            const found = matches[0];
+            if (found.zona_azul) {
+              resultDiv.className = 'result-display result-success';
+              resultDiv.innerHTML = `<strong>${found.rua} (${found.cp})</strong> está na <strong>ZONA AZUL</strong>.<br>Motivo: ${found.motivo}`;
+            } else {
+              resultDiv.className = 'result-display result-warning';
+              resultDiv.innerHTML = `<strong>${found.rua} (${found.cp})</strong> NÃO está na Zona Azul.<br>Motivo: ${found.motivo}`;
+            }
         } else {
-          resultDiv.className = 'result-display result-warning';
-          resultDiv.innerHTML = `<strong>${found.rua}</strong> NÃO está na Zona Azul.<br>Motivo: ${found.motivo}`;
+            resultDiv.className = 'result-display result-warning';
+            resultDiv.innerHTML = `Foram encontrados <strong>${matches.length}</strong> resultados. Veja o mapa ou a lista abaixo.`;
         }
       } else {
         resultDiv.className = 'result-display result-error';
-        resultDiv.textContent = `Rua "${input}" não encontrada na base de dados.`;
+        resultDiv.textContent = `Nenhum resultado encontrado para "${input}".`;
       }
 
-      // Also update the map view to focus on the result
-      renderMap(input);
+      // Update visual components
+      renderMarkers(matches);
+      renderCards(input);
     }
 
     function filterMap() {
       const input = document.getElementById('streetInput').value.trim();
-      renderMap(input);
+      // On keyup we might just want to update the list, but maybe not the map zoom yet to avoid jumping?
+      // Let's update both for responsiveness.
+      const matches = filterData(input);
+      renderMarkers(matches); // This will zoom to fit bounds of matches
+      renderCards(input);
     }
 
-    // Initial render
-    renderMap();
+    // Initialize
+    window.onload = () => {
+        initMap();
+        renderCards();
+    };
   </script>
 </body>
 </html>
