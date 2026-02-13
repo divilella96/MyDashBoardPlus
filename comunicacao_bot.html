@@ -292,7 +292,7 @@
         channel = document.querySelector('input[name="channel-reag"]:checked').value;
 
         subject = `Reagendamento de Entrega`;
-        body = `Olá, tudo bem?\n\nReferente à(s) encomenda(s): ${orders},\ninformamos que o novo horário previsto é às ${timeWindow}.\n\nEste contato está sendo realizado via ${contactType}.\n\nFicamos no aguardo da sua confirmação.\n\nObrigado.`;
+        body = `Referente à(s) encomenda(s): ${orders},\ninformamos que o novo horário previsto é às ${timeWindow}.\n\nEste contato foi realizado via ${contactType}.\n\nFicamos no aguardo da sua confirmação.\n\nObrigado.`;
 
         if (channel === 'WhatsApp') {
             // For WhatsApp, usually just the body text is used, optionally subject as first line
