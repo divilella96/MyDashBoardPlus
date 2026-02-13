@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Validação Mapa EMEL</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .map-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .zone-card {
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #fff;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .zone-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .zone-blue {
+      border-left: 5px solid #007bff;
+      background-color: #f0f8ff;
+    }
+    .zone-normal {
+      border-left: 5px solid #6c757d;
+      background-color: #f8f9fa;
+    }
+    .search-section {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .search-section input {
+      flex: 1;
+      min-width: 200px;
+    }
+    .search-section button {
+      width: auto;
+    }
+    .result-display {
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 8px;
+      display: none;
+    }
+    .result-success {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+    .result-warning {
+      background-color: #fff3cd;
+      border: 1px solid #ffeeba;
+      color: #856404;
+    }
+    .result-error {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+    .static-map-img {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    h3 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .card-detail {
+      font-size: 0.9em;
+      color: #555;
+      margin-bottom: 5px;
+    }
+    .card-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+    .badge-blue {
+      background-color: #007bff;
+      color: white;
+    }
+    .badge-grey {
+      background-color: #6c757d;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" style="max-width: 1000px;">
+    <h1>Validação Mapa EMEL</h1>
+
+    <div class="search-section">
+      <input type="text" id="streetInput" placeholder="Digite o nome da rua..." onkeyup="filterMap()">
+      <button class="btn-primary" onclick="validateStreet()">Validar</button>
+      <button class="btn-secondary" onclick="window.close()">Fechar</button>
+    </div>
+
+    <div id="validationResult" class="result-display"></div>
+
+    <h2>Mapa Virtual (Zonas)</h2>
+    <div id="virtualMap" class="map-container"></div>
+
+    <h2>Mapa Estático</h2>
+    <img src="mapa_emel.png" alt="Mapa EMEL" class="static-map-img">
+  </div>
+
+  <script>
+    const emelData = [
+      { "rua": "Rua do Pau de Bandeira", "numero": "20", "cp": "1200-758", "zona_azul": true, "motivo": "Santos-o-Velho / Faixa ribeirinha de acesso difícil (Zona 1)" },
+      { "rua": "Largo do Terreiro do Trigo", "numero": "13", "cp": "1100-603", "zona_azul": true, "motivo": "Alfama / Santa Apolónia / Faixa ribeirinha plana (Zona 2)" },
+      { "rua": "Rua da Imprensa Nacional", "numero": "N/A", "cp": "1250-124", "zona_azul": false, "motivo": "Príncipe Real / Cota Alta" },
+      { "rua": "Rua Santa Marinha", "numero": "5", "cp": "1100-490", "zona_azul": false, "motivo": "Graça / São Vicente / Cota Alta" },
+      { "rua": "Rua da Cruz dos Poiais", "numero": "49", "cp": "1200-320", "zona_azul": false, "motivo": "São Bento / Misericórdia / Cota Alta" },
+      { "rua": "Rua Arriaga", "numero": "33", "cp": "1200-734", "zona_azul": false, "motivo": "Janelas Verdes (Oeste) / Fora do limite / Via de distribuição" },
+      { "rua": "Rua de São Caetano", "numero": "6 e 41", "cp": "1200-829", "zona_azul": false, "motivo": "Lapa / Zona Residencial / Cota Alta" },
+      { "rua": "Travessa do Arco a Jesus", "numero": "16 e 17", "cp": "1200-029", "zona_azul": false, "motivo": "Bairro Alto / Mercês / Cota Alta" },
+      { "rua": "Rua de O Século", "numero": "N/A", "cp": "1200-433", "zona_azul": false, "motivo": "Príncipe Real / Bairro Alto / Cota Alta" },
+      { "rua": "Rua do Quelhas", "numero": "N/A", "cp": "1200-779", "zona_azul": false, "motivo": "Lapa / Madragoa / Encosta" },
+      { "rua": "Rua do Olival", "numero": "116", "cp": "1200-743", "zona_azul": false, "motivo": "Lapa / Janelas Verdes / Encosta Alta" },
+      { "rua": "Rua de Entremuros do Mirante", "numero": "43A", "cp": "1100-210", "zona_azul": false, "motivo": "Castelo / São Vicente / Cota Alta" },
+      { "rua": "Rua das Flores", "numero": "74", "cp": "1200-195", "zona_azul": false, "motivo": "Chiado / Encosta a subir para a cidade alta" },
+      { "rua": "Rua da Padaria", "numero": "22", "cp": "1100-389", "zona_azul": false, "motivo": "Baixa / Sé (Zona central excluída)" },
+      { "rua": "Rua da Bela Vista à Lapa", "numero": "17A", "cp": "1200-612", "zona_azul": false, "motivo": "Lapa / Cota Alta" },
+      { "rua": "Rua da Madalena", "numero": "N/A", "cp": "1100-319", "zona_azul": false, "motivo": "Baixa Pombalina (Zona central excluída)" },
+      { "rua": "Rua Professor Branco Rodrigues", "numero": "28", "cp": "1200-363", "zona_azul": false, "motivo": "Santo António / Rato / Cota Alta" },
+      { "rua": "Rua de Campo de Ourique", "numero": "57", "cp": "1250-060", "zona_azul": false, "motivo": "Campo de Ourique / Amoreiras / Planalto" },
+      { "rua": "Travessa dos Inglesinhos", "numero": "27", "cp": "1200-222", "zona_azul": false, "motivo": "Bairro Alto / Cota Alta" }
+    ];
+
+    function renderMap(filterText = "") {
+      const container = document.getElementById('virtualMap');
+      container.innerHTML = "";
+
+      const filteredData = emelData.filter(item =>
+        item.rua.toLowerCase().includes(filterText.toLowerCase()) ||
+        item.motivo.toLowerCase().includes(filterText.toLowerCase())
+      );
+
+      if (filteredData.length === 0) {
+        container.innerHTML = "<p>Nenhuma rua encontrada.</p>";
+        return;
+      }
+
+      filteredData.forEach(item => {
+        const card = document.createElement('div');
+        card.className = `zone-card ${item.zona_azul ? 'zone-blue' : 'zone-normal'}`;
+
+        const badgeClass = item.zona_azul ? 'badge-blue' : 'badge-grey';
+        const badgeText = item.zona_azul ? 'Zona Azul' : 'Fora da Zona Azul';
+
+        card.innerHTML = `
+          <h3>${item.rua}</h3>
+          <div class="card-detail"><strong>Número:</strong> ${item.numero}</div>
+          <div class="card-detail"><strong>CP:</strong> ${item.cp}</div>
+          <div class="card-detail"><strong>Motivo:</strong> ${item.motivo}</div>
+          <span class="card-badge ${badgeClass}">${badgeText}</span>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function validateStreet() {
+      const input = document.getElementById('streetInput').value.trim();
+      const resultDiv = document.getElementById('validationResult');
+
+      if (!input) {
+        resultDiv.style.display = 'block';
+        resultDiv.className = 'result-display result-error';
+        resultDiv.textContent = "Por favor, digite o nome de uma rua.";
+        return;
+      }
+
+      const found = emelData.find(item => item.rua.toLowerCase().includes(input.toLowerCase()));
+
+      resultDiv.style.display = 'block';
+      if (found) {
+        if (found.zona_azul) {
+          resultDiv.className = 'result-display result-success';
+          resultDiv.innerHTML = `<strong>${found.rua}</strong> está na <strong>ZONA AZUL</strong>.<br>Motivo: ${found.motivo}`;
+        } else {
+          resultDiv.className = 'result-display result-warning';
+          resultDiv.innerHTML = `<strong>${found.rua}</strong> NÃO está na Zona Azul.<br>Motivo: ${found.motivo}`;
+        }
+      } else {
+        resultDiv.className = 'result-display result-error';
+        resultDiv.textContent = `Rua "${input}" não encontrada na base de dados.`;
+      }
+
+      // Also update the map view to focus on the result
+      renderMap(input);
+    }
+
+    function filterMap() {
+      const input = document.getElementById('streetInput').value.trim();
+      renderMap(input);
+    }
+
+    // Initial render
+    renderMap();
+  </script>
+</body>
+</html>
