@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gerar Report Bloqueio WhatsApp</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -20,7 +21,16 @@
 
       <label for="loja">Número da Loja</label>
       <input type="text" id="loja" placeholder="Digite o número da loja">
-    
+
+      <label for="imagem_encomenda">Extrair Encomenda da Imagem:</label>
+      <input type="file" id="imagem_encomenda" accept="image/*" style="margin-bottom: 10px;">
+      <div id="ocr-status" style="margin-bottom: 10px; font-size: 0.9em; color: #555;"></div>
+      <div id="ocr-botoes" style="display: none; margin-bottom: 15px;">
+        <p style="margin-top: 0; margin-bottom: 5px; font-size: 0.9em;">Escolha os dados a utilizar:</p>
+        <button type="button" class="btn-primary" id="btn-extrair-6" style="margin-bottom: 5px;">Extrair 6 últimos</button>
+        <button type="button" class="btn-secondary" id="btn-extrair-tudo">Extrair Tudo</button>
+      </div>
+
       <label for="encomenda">Encomenda:</label>
       <input
         type="tel"
@@ -238,6 +248,72 @@ Ticket: ${ticket}`;
         }
         e.target.value = valor;
     });
+
+    // Lógica para OCR (Tesseract.js)
+    const imagemInput = document.getElementById("imagem_encomenda");
+    const ocrStatus = document.getElementById("ocr-status");
+    const ocrBotoes = document.getElementById("ocr-botoes");
+    const btnExtrairTudo = document.getElementById("btn-extrair-tudo");
+    const btnExtrair6 = document.getElementById("btn-extrair-6");
+
+    let extractedData = null;
+
+    imagemInput.addEventListener("change", async function(e) {
+      if (e.target.files.length === 0) return;
+      const file = e.target.files[0];
+
+      ocrStatus.innerText = "Lendo imagem, aguarde...";
+      ocrBotoes.style.display = "none";
+      extractedData = null;
+
+      try {
+        const worker = await Tesseract.createWorker("por");
+        const ret = await worker.recognize(file);
+        const text = ret.data.text;
+        await worker.terminate();
+
+        console.log("Texto extraído:", text);
+
+        // Regex para capturar Encomenda #00152366/773536
+        // Tesseract might output * instead of # sometimes.
+        const match = text.match(/Encomenda\s*[*#]?\s*([0-9]+)\s*\/\s*([0-9]+)/i);
+
+        if (match) {
+          const parte1 = match[1];
+          const parte2 = match[2];
+          extractedData = { parte1, parte2 };
+
+          ocrStatus.innerText = `Encontrado: ${parte1} / ${parte2}`;
+          ocrBotoes.style.display = "block";
+        } else {
+          ocrStatus.innerText = "Não foi possível encontrar o número da encomenda na imagem.";
+        }
+
+      } catch (err) {
+        console.error("Erro no OCR:", err);
+        ocrStatus.innerText = "Erro ao processar a imagem.";
+      }
+    });
+
+    btnExtrairTudo.addEventListener("click", function() {
+      if (extractedData) {
+        const fullNumber = extractedData.parte1 + "/" + extractedData.parte2;
+        campoEncomenda.value = fullNumber;
+        campoEncomenda.dispatchEvent(new Event('input'));
+        ocrStatus.innerText = "Número completo aplicado com sucesso!";
+        ocrBotoes.style.display = "none";
+      }
+    });
+
+    btnExtrair6.addEventListener("click", function() {
+      if (extractedData) {
+        campoEncomenda.value = extractedData.parte2;
+        campoEncomenda.dispatchEvent(new Event('input'));
+        ocrStatus.innerText = "Últimos 6 dígitos aplicados com sucesso!";
+        ocrBotoes.style.display = "none";
+      }
+    });
+
   </script>
 </body>
 </html>
