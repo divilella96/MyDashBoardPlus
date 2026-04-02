@@ -277,9 +277,9 @@ Ticket: ${ticket}`;
 
         console.log("Texto extraído:", text);
 
-        // Regex para capturar Encomenda #00152366/773536
-        // Tesseract might output * instead of # sometimes.
-        const match = text.match(/Encomenda\s*[*#]?\s*([0-9]+)\s*\/\s*([0-9]+)/i);
+        // Regex para capturar Encomenda #00152366/773536 ou apenas #00152366/773536
+        // Tesseract pode interpretar # como *, +, ou F
+        const match = text.match(/(?:Encomenda\s*)?[*#+F]?\s*([0-9]{6,8})\s*\/\s*([0-9]{6})/i);
 
         if (match) {
           const parte1 = match[1];
