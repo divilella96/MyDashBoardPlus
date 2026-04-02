@@ -279,11 +279,25 @@ Ticket: ${ticket}`;
 
         // Regex para capturar Encomenda #00152366/773536 ou apenas #00152366/773536
         // Tesseract pode interpretar # como *, +, ou F
-        const match = text.match(/(?:Encomenda\s*)?[*#+F]?\s*([0-9]{6,8})\s*\/\s*([0-9]{6})/i);
+        const match1 = text.match(/(?:Encomenda\s*)?[*#+F]?\s*([0-9]{6,8})\s*\/\s*([0-9]{6})/i);
 
-        if (match) {
-          const parte1 = match[1];
-          const parte2 = match[2];
+        // Regex para capturar formato tabela invertido: 774666 — O 00152824
+        // Pega um numero de 6 a 8 digitos (parte2), seguido de nao digitos, seguido de 8 digitos (parte1)
+        const match2 = text.match(/([0-9]{6,8})[\s\D]+([0-9]{8})/);
+
+        let parte1 = null;
+        let parte2 = null;
+
+        if (match1) {
+          parte1 = match1[1];
+          parte2 = match1[2];
+        } else if (match2) {
+          // No formato de tabela a ordem vem invertida (parte2 depois parte1)
+          parte1 = match2[2];
+          parte2 = match2[1].slice(0, 6); // Garante 6 digitos caso OCR leia um a mais
+        }
+
+        if (parte1 && parte2) {
           extractedData = { parte1, parte2 };
 
           ocrStatus.innerText = `Encontrado: ${parte1} / ${parte2}`;
