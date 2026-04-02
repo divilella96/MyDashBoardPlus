@@ -267,7 +267,10 @@ Ticket: ${ticket}`;
       extractedData = null;
 
       try {
-        const worker = await Tesseract.createWorker("por");
+        const worker = await Tesseract.createWorker('por', 1, {
+            workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
+            corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core.wasm.js'
+        });
         const ret = await worker.recognize(file);
         const text = ret.data.text;
         await worker.terminate();
