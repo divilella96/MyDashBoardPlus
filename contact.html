@@ -54,8 +54,17 @@
         </select>
       </div>
 
-      <button type="submit" class="btn-primary">Enviar E-mail</button>
+      <button type="submit" class="btn-primary">Criar E-mail</button>
     </form>
+
+    <div id="email_options" style="display: none; margin-top: 20px; text-align: center;">
+      <h3 style="margin-bottom: 15px;">Escolha como deseja enviar:</h3>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <a id="btn-gmail" href="#" target="_blank" class="btn-primary" style="text-decoration: none; display: inline-block; background-color: #DB4437; color: white; padding: 12px; border-radius: 8px;">Abrir no Gmail</a>
+        <a id="btn-outlook" href="#" target="_blank" class="btn-primary" style="text-decoration: none; display: inline-block; background-color: #0078D4; color: white; padding: 12px; border-radius: 8px;">Abrir no Outlook Web</a>
+        <a id="btn-default" href="#" class="btn-primary" style="text-decoration: none; display: inline-block; background-color: #6c757d; color: white; padding: 12px; border-radius: 8px;">App Padrão de E-mail (Telefone / PC)</a>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -98,7 +107,21 @@
         }
 
         const mailtoLink = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        window.location.href = mailtoLink;
+
+        // Gmail Web Compose Link
+        const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+        // Outlook Web Compose Link
+        const outlookLink = `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(to)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+        document.getElementById('btn-gmail').href = gmailLink;
+        document.getElementById('btn-outlook').href = outlookLink;
+        document.getElementById('btn-default').href = mailtoLink;
+
+        document.getElementById('email_options').style.display = 'block';
+
+        // Scroll to the options
+        document.getElementById('email_options').scrollIntoView({ behavior: 'smooth' });
       });
     });
 
