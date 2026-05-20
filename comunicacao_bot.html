@@ -15,7 +15,7 @@
       <button class="btn-primary" onclick="showFlow('reagendamento')">Reagendamento</button>
       <button class="btn-primary" onclick="showFlow('alerta')">Alerta: Preciso de Motorista</button>
       <button class="btn-primary" onclick="showFlow('outro')">Outro</button>
-      <button class="btn-primary" onclick="showFlow('contato')">Contato Pelo Site</button>
+      <button class="btn-primary" onclick="showFlow('alteracao_rota')">Alteração de Rota</button>
     </div>
 
     <!-- FLUXO 1: REAGENDAMENTO -->
@@ -103,24 +103,31 @@
       </form>
     </div>
 
-    <!-- FLUXO 4: CONTATO PELO SITE -->
-    <div id="contato" class="flow-section">
-      <h3>Contato Pelo Site</h3>
+    <!-- FLUXO 4: ALTERAÇÃO DE ROTA -->
+    <div id="alteracao_rota" class="flow-section">
+      <h3>Alteração de Rota</h3>
       <form onsubmit="return false;">
-        <label for="contato-nome">Nome de Usuario</label>
-        <input type="text" id="contato-nome" placeholder="Seu nome de usuário">
+        <label for="rota-numero">Número da rota</label>
+        <input type="text" id="rota-numero" placeholder="Número da rota">
 
-        <label for="contato-servidor">Servidor</label>
-        <input type="text" id="contato-servidor" placeholder="Servidor">
+        <label for="rota-motivo">Motivo da alteração</label>
+        <select id="rota-motivo">
+          <option value="">Selecione um motivo...</option>
+          <option value="Picking">Picking</option>
+          <option value="Faturação">Faturação</option>
+          <option value="Erro POS">Erro POS</option>
+          <option value="Não coube na carrinha">Não coube na carrinha</option>
+          <option value="Fora de Rota">Fora de Rota</option>
+          <option value="Unir rotas">Unir rotas</option>
+          <option value="Carro extra">Carro extra</option>
+          <option value="RS">RS</option>
+        </select>
 
-        <label for="contato-email">E-mail</label>
-        <input type="email" id="contato-email" placeholder="Seu e-mail">
-
-        <label for="contato-id">ID</label>
-        <input type="text" id="contato-id" placeholder="Seu ID">
-
-        <label for="contato-motivo">Motivo de Contato</label>
-        <textarea id="contato-motivo" placeholder="Explique o motivo do contato..."></textarea>
+        <label>Canal de Envio</label>
+        <div class="radio-group">
+            <label><input type="radio" name="channel-rota" value="WhatsApp" checked> WhatsApp</label>
+            <label><input type="radio" name="channel-rota" value="E-mail"> E-mail</label>
+        </div>
       </form>
     </div>
 
@@ -355,37 +362,22 @@
         channel = document.querySelector('input[name="channel-other"]:checked').value;
         subject = `Alerta Operacional | ${order}`;
         body = `${order}\n${description}`;
-      } else if (currentFlow === 'contato') {
-        const nome = document.getElementById('contato-nome').value.trim();
-        const servidor = document.getElementById('contato-servidor').value.trim();
-        const email = document.getElementById('contato-email').value.trim();
-        const id = document.getElementById('contato-id').value.trim();
-        const motivo = document.getElementById('contato-motivo').value.trim();
+      } else if (currentFlow === 'alteracao_rota') {
+        const rota = document.getElementById('rota-numero').value.trim();
+        const motivo = document.getElementById('rota-motivo').value;
 
-        if (!nome || !servidor || !email || !id || !motivo) {
-            alert("Por favor, preencha todos os campos do formulário de contato.");
+        if (!rota) {
+            alert("Por favor, preencha o número da rota.");
+            return { isValid: false };
+        }
+        if (!motivo) {
+            alert("Por favor, selecione o motivo da alteração.");
             return { isValid: false };
         }
 
-        channel = 'Discord';
-        subject = 'Contato Pelo Site';
-        // Build the structured Discord embed JSON object
-        body = JSON.stringify({
-            username: "MIAU",
-            embeds: [
-                {
-                    title: "Contato Pelo Site :computer:",
-                    color: 3447003, // A nice blue, or adjust to match image exactly if needed
-                    fields: [
-                        { name: "Nome de Usuario", value: nome, inline: true },
-                        { name: "Servidor", value: servidor, inline: true },
-                        { name: "Email", value: email, inline: true },
-                        { name: "ID", value: id, inline: true },
-                        { name: "Motivo de Contato", value: motivo, inline: false }
-                    ]
-                }
-            ]
-        });
+        channel = document.querySelector('input[name="channel-rota"]:checked').value;
+        subject = `Alteração de Rota | ${rota}`;
+        body = `Número da rota: ${rota}\nMotivo da alteração: ${motivo}`;
       }
 
       return { isValid, subject, body, channel };
@@ -398,18 +390,6 @@
       let fullMessage = '';
       if (data.channel === 'E-mail') {
           fullMessage = `Assunto:\n${data.subject}\n\nMensagem:\n${data.body}`;
-      } else if (data.channel === 'Discord') {
-          // Parse JSON and format it nicely for visualization
-          try {
-              const payload = JSON.parse(data.body);
-              const embed = payload.embeds[0];
-              fullMessage = `Canal: Discord Webhook\n\n[MIAU BOT]\nTítulo: ${embed.title}\n`;
-              embed.fields.forEach(f => {
-                  fullMessage += `\n${f.name}:\n${f.value}\n`;
-              });
-          } catch(e) {
-              fullMessage = data.body;
-          }
       } else {
           fullMessage = data.body;
       }
@@ -436,31 +416,6 @@
         const to = "help@lyzer.pt";
         const url = `mailto:${to}?subject=${encodeURIComponent(data.subject)}&body=${encodeURIComponent(data.body)}`;
         window.open(url, '_blank');
-      } else if (data.channel === 'Discord') {
-        const webhookUrl = prompt("Insira a URL do Webhook do Discord:", "");
-        if (!webhookUrl) {
-            alert("Envio cancelado: URL do Webhook não fornecida.");
-            return;
-        }
-
-        fetch(webhookUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: data.body
-        })
-        .then(response => {
-            if (response.ok) {
-                alert("Mensagem enviada com sucesso para o Discord!");
-            } else {
-                alert("Erro ao enviar mensagem para o Discord. Status: " + response.status);
-            }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            alert("Erro de rede ao tentar enviar para o Discord.");
-        });
       }
     }
 
