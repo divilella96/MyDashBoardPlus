@@ -15,6 +15,7 @@
       <button class="btn-primary" onclick="showFlow('reagendamento')">Reagendamento</button>
       <button class="btn-primary" onclick="showFlow('alerta')">Alerta: Preciso de Motorista</button>
       <button class="btn-primary" onclick="showFlow('outro')">Outro</button>
+      <button class="btn-primary" onclick="showFlow('alteracao_rota')">Alteração de Rota</button>
     </div>
 
     <!-- FLUXO 1: REAGENDAMENTO -->
@@ -98,6 +99,34 @@
         <div class="radio-group">
             <label><input type="radio" name="channel-other" value="WhatsApp" checked> WhatsApp</label>
             <label><input type="radio" name="channel-other" value="E-mail"> E-mail</label>
+        </div>
+      </form>
+    </div>
+
+    <!-- FLUXO 4: ALTERAÇÃO DE ROTA -->
+    <div id="alteracao_rota" class="flow-section">
+      <h3>Alteração de Rota</h3>
+      <form onsubmit="return false;">
+        <label for="rota-numero">Número da rota</label>
+        <input type="text" id="rota-numero" placeholder="Número da rota">
+
+        <label for="rota-motivo">Motivo da alteração</label>
+        <select id="rota-motivo">
+          <option value="">Selecione um motivo...</option>
+          <option value="Picking">Picking</option>
+          <option value="Faturação">Faturação</option>
+          <option value="Erro POS">Erro POS</option>
+          <option value="Não coube na carrinha">Não coube na carrinha</option>
+          <option value="Fora de Rota">Fora de Rota</option>
+          <option value="Unir rotas">Unir rotas</option>
+          <option value="Carro extra">Carro extra</option>
+          <option value="RS">RS</option>
+        </select>
+
+        <label>Canal de Envio</label>
+        <div class="radio-group">
+            <label><input type="radio" name="channel-rota" value="WhatsApp" checked> WhatsApp</label>
+            <label><input type="radio" name="channel-rota" value="E-mail"> E-mail</label>
         </div>
       </form>
     </div>
@@ -333,6 +362,22 @@
         channel = document.querySelector('input[name="channel-other"]:checked').value;
         subject = `Alerta Operacional | ${order}`;
         body = `${order}\n${description}`;
+      } else if (currentFlow === 'alteracao_rota') {
+        const rota = document.getElementById('rota-numero').value.trim();
+        const motivo = document.getElementById('rota-motivo').value;
+
+        if (!rota) {
+            alert("Por favor, preencha o número da rota.");
+            return { isValid: false };
+        }
+        if (!motivo) {
+            alert("Por favor, selecione o motivo da alteração.");
+            return { isValid: false };
+        }
+
+        channel = document.querySelector('input[name="channel-rota"]:checked').value;
+        subject = `Alteração de Rota | ${rota}`;
+        body = `Número da rota: ${rota}\nMotivo da alteração: ${motivo}`;
       }
 
       return { isValid, subject, body, channel };
