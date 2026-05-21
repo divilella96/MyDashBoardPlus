@@ -20,9 +20,11 @@
       <button class="btn-primary" onclick="abrirLiveOperationsRato()">Rato - Em Direto</button>
       <button class="btn-primary" onclick="abrirMensagemWhatsApp()">Report Bloqueio POS</button>
       <button class="btn-primary" onclick="abrirPaginaContato()">E-mail Artigo Esquecido</button>
+      <button class="btn-primary" onclick="abrirRotaRato()">ROTA Rato</button>
       <h2>São Bento</h2>
       <button class="btn-primary" onclick="abrirOrderManagementSaoBento()">São Bento - Encomendas e C&C</button>
       <button class="btn-primary" onclick="abrirOrderManagementSaoBentoAlt()">São Bento - Encomendas (Alt)</button>
+      <button class="btn-primary" onclick="abrirRotaSaoBento()">ROTA São Bento</button>
     </div>
   </div>
 
@@ -108,6 +110,39 @@
       const offset = date.getTimezoneOffset();
       const dateWithOffset = new Date(date.getTime() - (offset * 60 * 1000));
       return dateWithOffset.toISOString().slice(0, -1);
+    }
+
+    function abrirRotaRato() {
+      // Format current date as YYYY-MM-DDT00:00:00
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const dataAtual = `${yyyy}-${mm}-${dd}T00:00:00`;
+
+      const url = new URL("https://perform.lyzer.tech/pt/app/operations/routes");
+      url.searchParams.append("routeId", "211027");
+      url.searchParams.append("targetDate", dataAtual);
+      url.searchParams.append("stores", "133");
+      url.searchParams.append("pageIndex", "1");
+      url.searchParams.append("pageSize", "20");
+      window.open(url.toString(), "_blank");
+    }
+
+    function abrirRotaSaoBento() {
+      // Format current date as YYYY-MM-DDT00:00:00
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const dataAtual = `${yyyy}-${mm}-${dd}T00:00:00`;
+
+      const url = new URL("https://perform.lyzer.tech/pt/app/operations/routes");
+      url.searchParams.append("targetDate", dataAtual);
+      url.searchParams.append("storeServices", "375");
+      url.searchParams.append("pageIndex", "1");
+      url.searchParams.append("pageSize", "20");
+      window.open(url.toString(), "_blank");
     }
   </script>
 </body>
