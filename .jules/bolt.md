@@ -1,0 +1,3 @@
+## 2026-05-24 - [Debounce Map Leaflet Rendering]
+**Learning:** In `mapa_emel.html`, the map search filtering functionality tied directly to the `keyup` event triggered an immediate Leaflet map bounds recalculation (`map.fitBounds`) and complex DOM manipulation (clearing and rebuilding DOM cards in `renderCards`). These heavy visual operations on every keystroke cause significant UI lag and jank.
+**Action:** When implementing or optimizing search/filter inputs that trigger Leaflet map updates or bulk DOM card creation, always wrap the event handlers in a debounce function (e.g., `setTimeout` with ~300ms delay) to batch the updates and prevent freezing the main thread.

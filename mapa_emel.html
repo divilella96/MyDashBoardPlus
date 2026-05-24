@@ -470,13 +470,18 @@
       renderCards(input);
     }
 
+    let filterTimeout;
     function filterMap() {
-      const input = document.getElementById('streetInput').value.trim();
-      // On keyup we might just want to update the list, but maybe not the map zoom yet to avoid jumping?
-      // Let's update both for responsiveness.
-      const matches = filterData(input);
-      renderMarkers(matches); // This will zoom to fit bounds of matches
-      renderCards(input);
+      clearTimeout(filterTimeout);
+      filterTimeout = setTimeout(() => {
+        const input = document.getElementById('streetInput').value.trim();
+        // On keyup we might just want to update the list, but maybe not the map zoom yet to avoid jumping?
+        // Let's update both for responsiveness.
+        // Performance optimization: Debounced to prevent Leaflet map re-renders and DOM updates on every keystroke
+        const matches = filterData(input);
+        renderMarkers(matches); // This will zoom to fit bounds of matches
+        renderCards(input);
+      }, 300);
     }
 
     // Initialize
