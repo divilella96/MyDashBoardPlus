@@ -1,0 +1,3 @@
+## 2024-05-14 - Accessibility for dynamically generated icon buttons and focus states
+**Learning:** In vanilla HTML/JS projects, it's easy to overlook accessibility attributes like `aria-label` and `title` when creating DOM elements dynamically (like an "X" button for removal). Furthermore, focus states like `:focus-visible` must be explicitly defined in CSS, especially for buttons, to ensure users navigating via keyboard can clearly see which element is active.
+**Action:** Always ensure any dynamically created icon-only buttons include `aria-label` (for screen readers) and `title` (for visual tooltips). Ensure a global `:focus-visible` style is defined for all interactive elements in the main CSS file.
