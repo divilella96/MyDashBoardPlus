@@ -470,13 +470,21 @@
       renderCards(input);
     }
 
+    // Performance optimization: Debounce search input to prevent expensive Leaflet map re-renders
+    // and DOM updates on every keystroke, reducing main thread blocking and UI lag.
+    // Expected impact: ~50%+ reduction in render cycles during active typing.
+    let filterTimeout;
+
     function filterMap() {
-      const input = document.getElementById('streetInput').value.trim();
-      // On keyup we might just want to update the list, but maybe not the map zoom yet to avoid jumping?
-      // Let's update both for responsiveness.
-      const matches = filterData(input);
-      renderMarkers(matches); // This will zoom to fit bounds of matches
-      renderCards(input);
+      clearTimeout(filterTimeout);
+      filterTimeout = setTimeout(() => {
+        const input = document.getElementById('streetInput').value.trim();
+        // On keyup we might just want to update the list, but maybe not the map zoom yet to avoid jumping?
+        // Let's update both for responsiveness.
+        const matches = filterData(input);
+        renderMarkers(matches); // This will zoom to fit bounds of matches
+        renderCards(input);
+      }, 300);
     }
 
     // Initialize

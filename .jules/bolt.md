@@ -1,0 +1,3 @@
+## 2024-05-24 - Debouncing Map and DOM updates
+**Learning:** Frequent events like `keyup` triggering complex DOM operations and third-party library renders (like Leaflet map updates via `renderMarkers` / `setView`) block the main thread and create substantial UI lag, especially with embedded or external data. The standard rendering logic can be triggered unnecessarily many times before the user has actually finished typing their query.
+**Action:** When implementing search or filtering inputs that trigger DOM updates or third-party visual components (like charts, maps), always wrap the event handlers in a debounce function (e.g., `setTimeout` with ~300ms delay) to prevent UI lag.
