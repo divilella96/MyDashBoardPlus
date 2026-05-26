@@ -1,0 +1,3 @@
+## 2024-03-24 - [Debounce Leaflet re-renders to prevent main thread blocking]
+**Learning:** In a vanilla JS stack, triggering map boundary re-calculation and marker drawing via an external library like Leaflet directly on `keyup` for search inputs results in significant UI lag, blocking the main thread during typing because the computation completes synchronously on each stroke.
+**Action:** Always wrap event handlers that trigger complex DOM updates or map library rendering loops in a debounce block (`setTimeout`) to reduce execution frequency and preserve typing fluidity.

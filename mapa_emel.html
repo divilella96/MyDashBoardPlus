@@ -470,13 +470,24 @@
       renderCards(input);
     }
 
+    let filterTimeout; // Added for debouncing
+
     function filterMap() {
-      const input = document.getElementById('streetInput').value.trim();
-      // On keyup we might just want to update the list, but maybe not the map zoom yet to avoid jumping?
-      // Let's update both for responsiveness.
-      const matches = filterData(input);
-      renderMarkers(matches); // This will zoom to fit bounds of matches
-      renderCards(input);
+      // ⚡ Bolt Performance Optimization:
+      // Debounce the map filtering to prevent UI lag.
+      // Leaflet map re-renders (renderMarkers) and DOM updates (renderCards)
+      // are expensive and block the main thread if fired on every single keystroke.
+      // This waits 300ms after the last keystroke before executing.
+      clearTimeout(filterTimeout);
+
+      filterTimeout = setTimeout(() => {
+        const input = document.getElementById('streetInput').value.trim();
+        // On keyup we might just want to update the list, but maybe not the map zoom yet to avoid jumping?
+        // Let's update both for responsiveness.
+        const matches = filterData(input);
+        renderMarkers(matches); // This will zoom to fit bounds of matches
+        renderCards(input);
+      }, 300);
     }
 
     // Initialize
