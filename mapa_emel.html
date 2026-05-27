@@ -470,16 +470,25 @@
       renderCards(input);
     }
 
+    // ⚡ Bolt: Debounce search to prevent UI lag on every keystroke during map/card re-renders
+    let filterTimeout;
+    function filterMap() {
+      clearTimeout(filterTimeout);
+      filterTimeout = setTimeout(() => {
+        const input = document.getElementById('streetInput').value.trim();
     let filterMapTimeout;
 
     function filterMap() {
-      // ⚡ Bolt: Debounce search to prevent excessive DOM manipulation and Leaflet map re-renders on every keystroke
       clearTimeout(filterMapTimeout);
       filterMapTimeout = setTimeout(() => {
         const input = document.getElementById('streetInput').value.trim();
+        // Update both map and cards after user stops typing
+        // On keyup we might just want to update the list, but maybe not the map zoom yet to avoid jumping?
+        // Let's update both for responsiveness.
         const matches = filterData(input);
         renderMarkers(matches); // This will zoom to fit bounds of matches
         renderCards(input);
+      }, 300); // 300ms debounce delay
       }, 300);
     }
 
