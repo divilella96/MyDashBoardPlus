@@ -181,6 +181,8 @@
       const btn = document.createElement('button');
       btn.className = 'btn-remove';
       btn.textContent = 'X';
+      btn.setAttribute('aria-label', 'Remover encomenda');
+      btn.setAttribute('title', 'Remover encomenda');
       btn.onclick = function() {
         container.removeChild(div);
       };
