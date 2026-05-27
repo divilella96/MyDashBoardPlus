@@ -470,6 +470,12 @@
       renderCards(input);
     }
 
+    // ⚡ Bolt: Debounce search to prevent UI lag on every keystroke during map/card re-renders
+    let filterTimeout;
+    function filterMap() {
+      clearTimeout(filterTimeout);
+      filterTimeout = setTimeout(() => {
+        const input = document.getElementById('streetInput').value.trim();
     let filterMapTimeout;
 
     function filterMap() {
@@ -482,6 +488,7 @@
         const matches = filterData(input);
         renderMarkers(matches); // This will zoom to fit bounds of matches
         renderCards(input);
+      }, 300); // 300ms debounce delay
       }, 300);
     }
 
