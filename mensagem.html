@@ -39,8 +39,9 @@
         placeholder="Ex: 00035625 / 530729"
         required
         inputmode="numeric"
+        aria-describedby="erro-encomenda"
       />
-      <small id="erro-encomenda" style="color:red; display:none;">
+      <small id="erro-encomenda" style="color:red; display:none;" aria-live="polite">
       ⚠️ O número após a barra deve ter exatamente 6 dígitos.
       </small>
 
@@ -241,10 +242,16 @@ Ticket: ${ticket}`;
         if (depois.length === 6) {
             erro.style.display = "none";
             campoEncomenda.setCustomValidity("");
+            campoEncomenda.setAttribute("aria-invalid", "false");
         } else {
             erro.style.display = "block";
             campoEncomenda.setCustomValidity("O número após a barra deve ter exatamente 6 dígitos.");
+            campoEncomenda.setAttribute("aria-invalid", "true");
         }
+        } else {
+            campoEncomenda.removeAttribute("aria-invalid");
+            erro.style.display = "none";
+            campoEncomenda.setCustomValidity("");
         }
         e.target.value = valor;
     });
