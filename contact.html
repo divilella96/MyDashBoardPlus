@@ -13,8 +13,8 @@
 
     <form id="contactForm">
       <label for="encomenda">Número da Encomenda</label>
-      <input type="tel" id="encomenda" name="encomenda" placeholder="Ex: 00035625 / 530729" required inputmode="numeric">
-      <small id="erro-encomenda" style="color:red; display:none;">
+      <input type="tel" id="encomenda" name="encomenda" placeholder="Ex: 00035625 / 530729" required inputmode="numeric" aria-describedby="erro-encomenda">
+      <small id="erro-encomenda" style="color:red; display:none;" aria-live="polite">
       ⚠️ O número após a barra deve ter exatamente 6 dígitos.
       </small>
 
@@ -126,6 +126,7 @@
     });
 
     // Máscara para o campo "Encomenda"
+    const erroEncomenda = document.getElementById("erro-encomenda");
     document.getElementById("encomenda").addEventListener("input", function(e) {
       let valor = e.target.value.replace(/[^0-9/]/g, "");
       if (valor.includes("/")) {
@@ -135,12 +136,18 @@
         valor = antes + " / " + depois;
 
         if (depois.length === 6) {
-          erro.style.display = "none";
+          erroEncomenda.style.display = "none";
           e.target.setCustomValidity("");
+          e.target.removeAttribute("aria-invalid");
         } else {
-          erro.style.display = "block";
+          erroEncomenda.style.display = "block";
           e.target.setCustomValidity("O número após a barra deve ter exatamente 6 dígitos.");
+          e.target.setAttribute("aria-invalid", "true");
         }
+      } else {
+        erroEncomenda.style.display = "none";
+        e.target.setCustomValidity("");
+        e.target.removeAttribute("aria-invalid");
       }
       e.target.value = valor;
     });
