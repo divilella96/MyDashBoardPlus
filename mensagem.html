@@ -257,6 +257,7 @@ Ticket: ${ticket}`;
     const btnExtrair6 = document.getElementById("btn-extrair-6");
 
     let extractedData = null;
+    let tesseractWorker = null; // ⚡ Bolt: Store the worker globally to reuse it
 
     imagemInput.addEventListener("change", async function(e) {
       if (e.target.files.length === 0) return;
@@ -267,13 +268,17 @@ Ticket: ${ticket}`;
       extractedData = null;
 
       try {
-        const worker = await Tesseract.createWorker('por', 1, {
-            workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
-            corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core.wasm.js'
-        });
-        const ret = await worker.recognize(file);
+        // ⚡ Bolt: Reuse the Tesseract worker instance to avoid WebAssembly and language data reloading overhead on subsequent image uploads
+        if (!tesseractWorker) {
+          tesseractWorker = await Tesseract.createWorker('por', 1, {
+              workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
+              corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core.wasm.js'
+          });
+        }
+
+        const ret = await tesseractWorker.recognize(file);
         const text = ret.data.text;
-        await worker.terminate();
+        // ⚡ Bolt: Removed worker.terminate() to keep the worker alive for future uploads
 
         console.log("Texto extraído:", text);
 
