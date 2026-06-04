@@ -8,3 +8,7 @@
 ## 2024-11-20 - Missing Utility Classes
 **Learning:** Found that accessibility-focused utility classes like `.visually-hidden` were being used in the HTML markup (`mensagem.html`) to hide screen reader text (`#status-announcer`) but were never actually defined in the shared CSS (`style.css`), meaning the text was visibly exposed or broken.
 **Action:** Always verify that utility classes referenced in markup are properly defined in the corresponding stylesheets, particularly those affecting accessibility visibility.
+
+## 2024-05-23 - Screen Reader Support for Dynamic Inline Validation
+**Learning:** Conditionally rendering inline error messages (e.g., via `display: none` to `display: block`) fails to notify screen readers unless explicitly wired up. A visual `<small>` error container is completely ignored by screen readers in relation to its input unless they are explicitly associated.
+**Action:** For inline validation, always link the input to the error message ID using `aria-describedby`, dynamically toggle `aria-invalid="true/false"` on the input during JavaScript validation, and use `aria-live="polite"` on the error container to ensure errors are announced.
