@@ -1,0 +1,37 @@
+--- mensagem.html	2023-10-25
++++ mensagem.html	2023-10-25
+@@ -258,6 +258,19 @@
+     const btnExtrair6 = document.getElementById("btn-extrair-6");
+
+     let extractedData = null;
++
++    // ⚡ Bolt: Global worker for OCR optimization
++    let globalWorker = null;
++
++    async function getWorker() {
++      if (!globalWorker) {
++        globalWorker = await Tesseract.createWorker('por', 1, {
++            workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
++            corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core.wasm.js'
++        });
++      }
++      return globalWorker;
++    }
+
+     imagemInput.addEventListener("change", async function(e) {
+       if (e.target.files.length === 0) return;
+@@ -268,13 +281,10 @@
+       extractedData = null;
+
+       try {
+-        const worker = await Tesseract.createWorker('por', 1, {
+-            workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
+-            corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core.wasm.js'
+-        });
++        // ⚡ Bolt: Reusing worker instance to prevent redundant WebAssembly initialization overhead
++        const worker = await getWorker();
+         const ret = await worker.recognize(file);
+         const text = ret.data.text;
+-        await worker.terminate();
+
+         console.log("Texto extraído:", text);
