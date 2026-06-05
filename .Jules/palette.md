@@ -8,3 +8,7 @@
 ## 2024-11-20 - Missing Utility Classes
 **Learning:** Found that accessibility-focused utility classes like `.visually-hidden` were being used in the HTML markup (`mensagem.html`) to hide screen reader text (`#status-announcer`) but were never actually defined in the shared CSS (`style.css`), meaning the text was visibly exposed or broken.
 **Action:** Always verify that utility classes referenced in markup are properly defined in the corresponding stylesheets, particularly those affecting accessibility visibility.
+
+## 2024-11-20 - [Accessibility] Replacing alert() with Accessible Inline Validation
+**Learning:** Found that form validation in `aviso_atraso.html` relied on blocking `alert()` calls, which provide a poor user experience and are not accessible to screen readers natively tied to the form field. The pattern for this app is to connect validation directly to inputs.
+**Action:** Always replace blocking `alert()` validation with polite inline error containers connected to the input via `aria-describedby` and dynamically toggle `aria-invalid="true"` while shifting focus (`.focus()`) to the invalid input.

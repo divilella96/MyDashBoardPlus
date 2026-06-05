@@ -38,7 +38,8 @@
 
     <form onsubmit="return false;">
       <label for="phones">Números de Telefone</label>
-      <textarea id="phones" placeholder="Insira os números de telefone (separados por vírgula ou nova linha). Ex: 912345678, 961234567"></textarea>
+      <textarea id="phones" aria-invalid="false" aria-describedby="phones-error" placeholder="Insira os números de telefone (separados por vírgula ou nova linha). Ex: 912345678, 961234567" oninput="resetPhoneError()"></textarea>
+      <div id="phones-error" aria-live="polite" style="display:none; color:red; margin-top: 5px; margin-bottom: 15px; font-size: 0.9em;"></div>
 
       <label for="time">Hora Prevista de Entrega</label>
       <input type="time" id="time" value="13:30">
@@ -53,17 +54,31 @@
   </div>
 
   <script>
+    function resetPhoneError() {
+      const errorDiv = document.getElementById('phones-error');
+      const phonesInputEl = document.getElementById('phones');
+      errorDiv.style.display = 'none';
+      errorDiv.textContent = '';
+      phonesInputEl.setAttribute('aria-invalid', 'false');
+    }
+
     function showOptions() {
-      const phonesInput = document.getElementById('phones').value;
+      const phonesInputEl = document.getElementById('phones');
+      const phonesInput = phonesInputEl.value;
       const timeInput = document.getElementById('time').value;
       const resultsDiv = document.getElementById('results');
       const linksList = document.getElementById('linksList');
+      const errorDiv = document.getElementById('phones-error');
 
       // Clear previous results
       linksList.innerHTML = '';
+      resetPhoneError();
 
       if (!phonesInput.trim()) {
-        alert("Por favor, insira pelo menos um número de telefone.");
+        errorDiv.textContent = "Por favor, insira pelo menos um número de telefone.";
+        errorDiv.style.display = 'block';
+        phonesInputEl.setAttribute('aria-invalid', 'true');
+        phonesInputEl.focus();
         return;
       }
 
@@ -72,7 +87,10 @@
       const phones = phonesInput.split(/[\n,;]+/).map(p => p.trim()).filter(p => p !== '');
 
       if (phones.length === 0) {
-        alert("Nenhum número válido encontrado.");
+        errorDiv.textContent = "Nenhum número válido encontrado.";
+        errorDiv.style.display = 'block';
+        phonesInputEl.setAttribute('aria-invalid', 'true');
+        phonesInputEl.focus();
         return;
       }
 
