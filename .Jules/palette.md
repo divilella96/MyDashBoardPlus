@@ -8,3 +8,7 @@
 ## 2024-11-20 - Missing Utility Classes
 **Learning:** Found that accessibility-focused utility classes like `.visually-hidden` were being used in the HTML markup (`mensagem.html`) to hide screen reader text (`#status-announcer`) but were never actually defined in the shared CSS (`style.css`), meaning the text was visibly exposed or broken.
 **Action:** Always verify that utility classes referenced in markup are properly defined in the corresponding stylesheets, particularly those affecting accessibility visibility.
+
+## 2024-05-22 - Implicit Global Variables from IDs breaking JavaScript execution
+**Learning:** In vanilla JavaScript, elements with an `id` attribute are automatically made available as global variables (e.g. `<small id="erro-encomenda">` becomes `window['erro-encomenda']` or `erro`). This is a bad practice and can cause confusing silent failures or `ReferenceError`s when trying to manipulate these elements directly without explicitly querying the DOM first.
+**Action:** Always explicitly define DOM elements using `document.getElementById('id')` or similar methods before trying to manipulate them, even if the implicit global variable seems to work initially.
