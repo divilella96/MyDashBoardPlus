@@ -24,7 +24,7 @@
 
       <label for="imagem_encomenda">Extrair Encomenda da Imagem:</label>
       <input type="file" id="imagem_encomenda" accept="image/*" style="margin-bottom: 10px;">
-      <div id="ocr-status" style="margin-bottom: 10px; font-size: 0.9em; color: #555;"></div>
+      <div id="ocr-status" style="margin-bottom: 10px; font-size: 0.9em; color: #555;" aria-live="polite"></div>
       <div id="ocr-botoes" style="display: none; margin-bottom: 15px;">
         <p style="margin-top: 0; margin-bottom: 5px; font-size: 0.9em;">Escolha os dados a utilizar:</p>
         <button type="button" class="btn-primary" id="btn-extrair-6" style="margin-bottom: 5px;">Extrair 6 últimos</button>
@@ -39,8 +39,9 @@
         placeholder="Ex: 00035625 / 530729"
         required
         inputmode="numeric"
+        aria-describedby="erro-encomenda"
       />
-      <small id="erro-encomenda" style="color:red; display:none;">
+      <small id="erro-encomenda" style="color:red; display:none;" aria-live="polite">
       ⚠️ O número após a barra deve ter exatamente 6 dígitos.
       </small>
 
@@ -241,10 +242,17 @@ Ticket: ${ticket}`;
         if (depois.length === 6) {
             erro.style.display = "none";
             campoEncomenda.setCustomValidity("");
+            campoEncomenda.removeAttribute("aria-invalid");
         } else {
             erro.style.display = "block";
             campoEncomenda.setCustomValidity("O número após a barra deve ter exatamente 6 dígitos.");
+            campoEncomenda.setAttribute("aria-invalid", "true");
         }
+        } else {
+            // Se não tem barra, reseta estado de erro por enquanto
+            erro.style.display = "none";
+            campoEncomenda.setCustomValidity("");
+            campoEncomenda.removeAttribute("aria-invalid");
         }
         e.target.value = valor;
     });
