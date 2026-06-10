@@ -8,3 +8,7 @@
 ## 2024-11-20 - Missing Utility Classes
 **Learning:** Found that accessibility-focused utility classes like `.visually-hidden` were being used in the HTML markup (`mensagem.html`) to hide screen reader text (`#status-announcer`) but were never actually defined in the shared CSS (`style.css`), meaning the text was visibly exposed or broken.
 **Action:** Always verify that utility classes referenced in markup are properly defined in the corresponding stylesheets, particularly those affecting accessibility visibility.
+
+## 2024-05-18 - Missing Explicit Labels for Form Inputs
+**Learning:** Found that multiple vanilla HTML files (e.g., `mapa_emel.html`, `comunicacao_bot.html`) relied solely on visual `placeholder` text instead of using accessible `<label>` wrappers or explicit `aria-label` attributes for primary input fields. This negatively impacts screen reader users who miss context.
+**Action:** Always provide explicit `aria-label` attributes to text inputs (both static and dynamically generated via JS) when visible `<label>` wrappers are omitted for design reasons.
