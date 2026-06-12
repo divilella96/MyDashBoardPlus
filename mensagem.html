@@ -258,6 +258,9 @@ Ticket: ${ticket}`;
 
     let extractedData = null;
 
+    // ⚡ Bolt: Reuse Tesseract worker to eliminate redundant WebAssembly loading overhead
+    let tesseractWorker = null;
+
     imagemInput.addEventListener("change", async function(e) {
       if (e.target.files.length === 0) return;
       const file = e.target.files[0];
@@ -267,13 +270,15 @@ Ticket: ${ticket}`;
       extractedData = null;
 
       try {
-        const worker = await Tesseract.createWorker('por', 1, {
-            workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
-            corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core.wasm.js'
-        });
-        const ret = await worker.recognize(file);
+        if (!tesseractWorker) {
+          tesseractWorker = await Tesseract.createWorker('por', 1, {
+              workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
+              corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core.wasm.js'
+          });
+        }
+
+        const ret = await tesseractWorker.recognize(file);
         const text = ret.data.text;
-        await worker.terminate();
 
         console.log("Texto extraído:", text);
 
