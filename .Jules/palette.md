@@ -8,3 +8,7 @@
 ## 2024-11-20 - Missing Utility Classes
 **Learning:** Found that accessibility-focused utility classes like `.visually-hidden` were being used in the HTML markup (`mensagem.html`) to hide screen reader text (`#status-announcer`) but were never actually defined in the shared CSS (`style.css`), meaning the text was visibly exposed or broken.
 **Action:** Always verify that utility classes referenced in markup are properly defined in the corresponding stylesheets, particularly those affecting accessibility visibility.
+
+## 2024-06-14 - [Accessibility] ARIA Labels on Placeholder Inputs
+**Learning:** Text inputs that rely solely on `placeholder` text for context (lacking a `<label>` element) are completely inaccessible to screen readers, creating a significant UX gap.
+**Action:** Always add descriptive `aria-label` attributes to such inputs (e.g., `<input placeholder="Search..." aria-label="Search items">`), ensuring the label is injected dynamically via JavaScript for newly created elements.
