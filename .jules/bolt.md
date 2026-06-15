@@ -10,3 +10,6 @@
 ## 2024-05-27 - [Debounce implementation Syntax Checks]
 **Learning:** In vanilla HTML/JS environments without build tools, applying debouncing or performance optimizations can easily introduce syntax errors (like duplicate function declarations or missing brackets) that silently fail in the browser or block functionality entirely.
 **Action:** Always verify inline JavaScript performance fixes (like debouncing) using `node -c` on extracted scripts or automated frontend verification (Playwright) to ensure the optimization doesn't introduce syntax errors.
+## 2026-06-15 - [Tesseract.js Worker Reuse]
+**Learning:** In client-side OCR implementations using Tesseract.js, repeatedly calling `Tesseract.createWorker()` and `worker.terminate()` for each image upload introduces severe performance bottlenecks because it forces the browser to re-download, re-parse, and re-initialize the WebAssembly core and language models every time.
+**Action:** When implementing Tesseract.js, always initialize the worker instance once globally and reuse it for subsequent image recognitions, removing `worker.terminate()` unless explicitly necessary for memory management.
