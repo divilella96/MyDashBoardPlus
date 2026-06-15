@@ -258,6 +258,9 @@ Ticket: ${ticket}`;
 
     let extractedData = null;
 
+    // ⚡ Bolt: Global worker instance to prevent redundant WebAssembly initialization overhead on each upload
+    let globalTesseractWorker = null;
+
     imagemInput.addEventListener("change", async function(e) {
       if (e.target.files.length === 0) return;
       const file = e.target.files[0];
@@ -267,13 +270,18 @@ Ticket: ${ticket}`;
       extractedData = null;
 
       try {
-        const worker = await Tesseract.createWorker('por', 1, {
-            workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
-            corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core.wasm.js'
-        });
-        const ret = await worker.recognize(file);
+        // ⚡ Bolt: Initialize the worker only once and reuse it
+        if (!globalTesseractWorker) {
+            globalTesseractWorker = await Tesseract.createWorker('por', 1, {
+                workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
+                corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core.wasm.js'
+            });
+        }
+
+        const ret = await globalTesseractWorker.recognize(file);
         const text = ret.data.text;
-        await worker.terminate();
+
+        // ⚡ Bolt: Removed worker.terminate() so it can be reused for subsequent file uploads
 
         console.log("Texto extraído:", text);
 
