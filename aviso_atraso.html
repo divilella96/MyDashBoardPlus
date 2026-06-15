@@ -38,7 +38,8 @@
 
     <form onsubmit="return false;">
       <label for="phones">Números de Telefone</label>
-      <textarea id="phones" placeholder="Insira os números de telefone (separados por vírgula ou nova linha). Ex: 912345678, 961234567"></textarea>
+      <textarea id="phones" placeholder="Insira os números de telefone (separados por vírgula ou nova linha). Ex: 912345678, 961234567" aria-describedby="phones-error"></textarea>
+      <small id="phones-error" style="color:red; display:none; margin-top: 5px;" aria-live="polite"></small>
 
       <label for="time">Hora Prevista de Entrega</label>
       <input type="time" id="time" value="13:30">
@@ -54,16 +55,24 @@
 
   <script>
     function showOptions() {
-      const phonesInput = document.getElementById('phones').value;
+      const phonesElement = document.getElementById('phones');
+      const phonesInput = phonesElement.value;
+      const errorElement = document.getElementById('phones-error');
       const timeInput = document.getElementById('time').value;
       const resultsDiv = document.getElementById('results');
       const linksList = document.getElementById('linksList');
 
-      // Clear previous results
+      // Clear previous results and errors
       linksList.innerHTML = '';
+      errorElement.textContent = '';
+      errorElement.style.display = 'none';
+      phonesElement.removeAttribute('aria-invalid');
 
       if (!phonesInput.trim()) {
-        alert("Por favor, insira pelo menos um número de telefone.");
+        errorElement.textContent = "Por favor, insira pelo menos um número de telefone.";
+        errorElement.style.display = 'block';
+        phonesElement.setAttribute('aria-invalid', 'true');
+        phonesElement.focus();
         return;
       }
 
@@ -72,7 +81,10 @@
       const phones = phonesInput.split(/[\n,;]+/).map(p => p.trim()).filter(p => p !== '');
 
       if (phones.length === 0) {
-        alert("Nenhum número válido encontrado.");
+        errorElement.textContent = "Nenhum número válido encontrado.";
+        errorElement.style.display = 'block';
+        phonesElement.setAttribute('aria-invalid', 'true');
+        phonesElement.focus();
         return;
       }
 
