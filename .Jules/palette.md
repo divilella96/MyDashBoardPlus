@@ -8,3 +8,7 @@
 ## 2024-11-20 - Missing Utility Classes
 **Learning:** Found that accessibility-focused utility classes like `.visually-hidden` were being used in the HTML markup (`mensagem.html`) to hide screen reader text (`#status-announcer`) but were never actually defined in the shared CSS (`style.css`), meaning the text was visibly exposed or broken.
 **Action:** Always verify that utility classes referenced in markup are properly defined in the corresponding stylesheets, particularly those affecting accessibility visibility.
+
+## 2024-11-20 - Inline Validation Accessibility
+**Learning:** For screen readers to properly announce inline form validation errors in vanilla JS, you must explicitly connect the input to the error message (`aria-describedby`), make the error container live (`aria-live="polite"`), and dynamically toggle the invalid state on the input itself (`aria-invalid="true"/"false"`).
+**Action:** When implementing custom regex validation or input masking in vanilla JS forms, always include these three ARIA attributes to ensure the error state is communicable to assistive technologies.
