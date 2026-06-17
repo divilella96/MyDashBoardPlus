@@ -28,7 +28,7 @@
         <label>Encomendas</label>
         <div id="order-list">
           <div class="order-input-group">
-            <input type="text" class="order-input" placeholder="Número da encomenda" maxlength="6" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+            <input type="text" class="order-input" aria-label="Número da encomenda" placeholder="Número da encomenda" maxlength="6" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
             <!-- First one typically doesn't have remove button unless we want to allow 0 orders, but usually at least 1 is needed.
                  Let's add remove button even for the first one for consistency, but maybe handle logic to not remove if it's the only one?
                  Or just let it be empty. -->
@@ -173,6 +173,7 @@
       const input = document.createElement('input');
       input.type = 'text';
       input.className = 'order-input';
+      input.setAttribute('aria-label', 'Número da encomenda');
       input.placeholder = 'Número da encomenda';
       input.maxLength = 6;
       input.pattern = "[0-9]*";
