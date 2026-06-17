@@ -10,3 +10,6 @@
 ## 2024-05-27 - [Debounce implementation Syntax Checks]
 **Learning:** In vanilla HTML/JS environments without build tools, applying debouncing or performance optimizations can easily introduce syntax errors (like duplicate function declarations or missing brackets) that silently fail in the browser or block functionality entirely.
 **Action:** Always verify inline JavaScript performance fixes (like debouncing) using `node -c` on extracted scripts or automated frontend verification (Playwright) to ensure the optimization doesn't introduce syntax errors.
+## 2024-05-28 - [OCR Worker Reuse Optimization]
+**Learning:** Re-instantiating WebAssembly modules and models on every user action (like Tesseract.js `createWorker`) introduces significant performance overhead, especially on mobile devices using client-side OCR without servers.
+**Action:** Always maintain a global instance of heavy worker objects if they will be called repeatedly, bypassing the initialization cost for subsequent calls, provided the object has long lifecycle potential without critical memory leaks.
