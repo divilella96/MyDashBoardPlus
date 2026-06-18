@@ -259,6 +259,9 @@ Ticket: ${ticket}`;
     let extractedData = null;
     let tesseractWorker = null; // Cache global do worker
 
+    // ⚡ Bolt: Cache worker instance to eliminate WebAssembly loading overhead on subsequent uploads
+    let tesseractWorker = null;
+
     imagemInput.addEventListener("change", async function(e) {
       if (e.target.files.length === 0) return;
       const file = e.target.files[0];
@@ -268,17 +271,18 @@ Ticket: ${ticket}`;
       extractedData = null;
 
       try {
-        // Inicializa o worker apenas uma vez e reutiliza, evitando overhead de inicialização do WASM
         if (!tesseractWorker) {
-          tesseractWorker = await Tesseract.createWorker('por', 1, {
-              workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
-              corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core.wasm.js'
-          });
+            tesseractWorker = await Tesseract.createWorker('por', 1, {
+                workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
+                corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core.wasm.js'
+            });
         }
 
         const ret = await tesseractWorker.recognize(file);
         const text = ret.data.text;
-        // Removido await worker.terminate() para permitir a reutilização
+
+        // ⚡ Bolt: Intentionally NOT calling tesseractWorker.terminate() here
+        // to keep the worker alive for future recognition tasks.
 
         console.log("Texto extraído:", text);
 
