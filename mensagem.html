@@ -249,7 +249,7 @@ Ticket: ${ticket}`;
         e.target.value = valor;
     });
 
-    // Lógica para OCR (Tesseract.js)
+    // ⚡ Bolt: Lógica para OCR (Tesseract.js) com Worker Global para evitar carregamento redundante do WebAssembly
     const imagemInput = document.getElementById("imagem_encomenda");
     const ocrStatus = document.getElementById("ocr-status");
     const ocrBotoes = document.getElementById("ocr-botoes");
@@ -257,6 +257,7 @@ Ticket: ${ticket}`;
     const btnExtrair6 = document.getElementById("btn-extrair-6");
 
     let extractedData = null;
+    let tesseractWorker = null; // Cache global do worker
 
     imagemInput.addEventListener("change", async function(e) {
       if (e.target.files.length === 0) return;
@@ -267,13 +268,17 @@ Ticket: ${ticket}`;
       extractedData = null;
 
       try {
-        const worker = await Tesseract.createWorker('por', 1, {
-            workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
-            corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core.wasm.js'
-        });
-        const ret = await worker.recognize(file);
+        // Inicializa o worker apenas uma vez e reutiliza, evitando overhead de inicialização do WASM
+        if (!tesseractWorker) {
+          tesseractWorker = await Tesseract.createWorker('por', 1, {
+              workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
+              corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core.wasm.js'
+          });
+        }
+
+        const ret = await tesseractWorker.recognize(file);
         const text = ret.data.text;
-        await worker.terminate();
+        // Removido await worker.terminate() para permitir a reutilização
 
         console.log("Texto extraído:", text);
 
