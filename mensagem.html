@@ -249,7 +249,7 @@ Ticket: ${ticket}`;
         e.target.value = valor;
     });
 
-    // Lógica para OCR (Tesseract.js)
+    // ⚡ Bolt: Lógica para OCR (Tesseract.js) com Worker Global para evitar carregamento redundante do WebAssembly
     const imagemInput = document.getElementById("imagem_encomenda");
     const ocrStatus = document.getElementById("ocr-status");
     const ocrBotoes = document.getElementById("ocr-botoes");
@@ -257,6 +257,7 @@ Ticket: ${ticket}`;
     const btnExtrair6 = document.getElementById("btn-extrair-6");
 
     let extractedData = null;
+    let tesseractWorker = null; // Cache global do worker
 
     // ⚡ Bolt: Cache worker instance to eliminate WebAssembly loading overhead on subsequent uploads
     let tesseractWorker = null;
