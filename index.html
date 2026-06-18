@@ -121,9 +121,9 @@
       const dataAtual = `${yyyy}-${mm}-${dd}T00:00:00`;
 
       const url = new URL("https://perform.lyzer.tech/pt/app/operations/routes");
-      url.searchParams.append("routeId", "211027");
       url.searchParams.append("targetDate", dataAtual);
       url.searchParams.append("stores", "133");
+      url.searchParams.append("storeServices", "190");
       url.searchParams.append("pageIndex", "1");
       url.searchParams.append("pageSize", "20");
       window.open(url.toString(), "_blank");
