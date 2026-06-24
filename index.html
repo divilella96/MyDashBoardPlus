@@ -39,14 +39,22 @@
     }
 
     function abrirLiveOperationsSaoBento() {
-      const agora = getLocalISOString(new Date());
+      const agoraLocal = getLocalISOString(new Date());
+      const agoraUTC = new Date().toISOString();
       const url = new URL("https://perform.lyzer.tech/pt/app/operations/live-operations");
-      url.searchParams.append("dateRange[from]", agora);
+      url.searchParams.append("dateRange[from]", agoraLocal);
       url.searchParams.append("stores", "244");
-      const statuses = ["Pending", "InAssignment", "Open", "Invoicing", "Processing", "Complete", "InTransit", "Incidence"];
+
+      const statuses = ["Cancelled", "Complete", "InAssignment", "Incidence", "InTransit", "Invoicing", "Open", "Pending", "Processing"];
       statuses.forEach(status => url.searchParams.append("status", status));
+
+      url.searchParams.append("deadline", agoraUTC);
+      url.searchParams.append("retailer", "29");
+      url.searchParams.append("store", "244");
+      url.searchParams.append("serviceType", "375");
       url.searchParams.append("pageIndex", "1");
       url.searchParams.append("pageSize", "50");
+
       window.open(url.toString(), "_blank");
     }
 
