@@ -15,15 +15,12 @@
       <button class="btn-primary" onclick="window.open('comunicacao_bot.html', '_blank')">Comunicação Com Bot</button>
       <button class="btn-primary" onclick="window.open('mapa_emel.html', '_blank')">Validar Mapa EMEL</button>
       <h2>Rato</h2>
-      <button class="btn-primary" onclick="abrirOrderManagementRato()">Rato - Encomendas e C&C</button>
-      <button class="btn-primary" onclick="abrirOrderManagementRatoAlt()">Rato - Encomendas (Alt)</button>
       <button class="btn-primary" onclick="abrirLiveOperationsRato()">Rato - Em Direto</button>
       <button class="btn-primary" onclick="abrirMensagemWhatsApp()">Report Bloqueio POS</button>
       <button class="btn-primary" onclick="abrirPaginaContato()">E-mail Artigo Esquecido</button>
       <button class="btn-primary" onclick="abrirRotaRato()">ROTA Rato</button>
       <h2>São Bento</h2>
-      <button class="btn-primary" onclick="abrirOrderManagementSaoBento()">São Bento - Encomendas e C&C</button>
-      <button class="btn-primary" onclick="abrirOrderManagementSaoBentoAlt()">São Bento - Encomendas (Alt)</button>
+      <button class="btn-primary" onclick="abrirLiveOperationsSaoBento()">São Bento - Em Direto</button>
       <button class="btn-primary" onclick="abrirRotaSaoBento()">ROTA São Bento</button>
     </div>
   </div>
@@ -41,45 +38,9 @@
       return [...getStatusList(),"Cancelled","ManualAssignment"];
     }
 
-    function abrirOrderManagementRatoAlt() {
+    function abrirLiveOperationsSaoBento() {
       const agora = getLocalISOString(new Date());
-      const url = new URL("https://prd-swiftso.azurewebsites.net/pt/app/operations/order-management");
-      url.searchParams.append("dateRange[from]", agora);
-      url.searchParams.append("stores", "133");
-      const statuses = ["Pending", "InAssignment", "Open", "Invoicing", "Processing", "Complete", "InTransit", "Incidence"];
-      statuses.forEach(status => url.searchParams.append("status", status));
-      url.searchParams.append("pageIndex", "1");
-      url.searchParams.append("pageSize", "50");
-      window.open(url.toString(), "_blank");
-    }
-
-    function abrirOrderManagementRato() {
-      const agora = getLocalISOString(new Date());
-      const url = new URL("https://perform.lyzer.tech/pt/app/operations/order-management");
-      url.searchParams.append("dateRange[from]", agora);
-      url.searchParams.append("stores", "133");
-      const statuses = ["Pending", "InAssignment", "Open", "Invoicing", "Processing", "Complete", "InTransit", "Incidence"];
-      statuses.forEach(status => url.searchParams.append("status", status));
-      url.searchParams.append("pageIndex", "1");
-      url.searchParams.append("pageSize", "50");
-      window.open(url.toString(), "_blank");
-    }
-
-    function abrirOrderManagementSaoBentoAlt() {
-      const agora = getLocalISOString(new Date());
-      const url = new URL("https://prd-swiftso.azurewebsites.net/pt/app/operations/order-management");
-      url.searchParams.append("dateRange[from]", agora);
-      url.searchParams.append("stores", "244");
-      const statuses = ["Pending", "InAssignment", "Open", "Invoicing", "Processing", "Complete", "InTransit", "Incidence"];
-      statuses.forEach(status => url.searchParams.append("status", status));
-      url.searchParams.append("pageIndex", "1");
-      url.searchParams.append("pageSize", "50");
-      window.open(url.toString(), "_blank");
-    }
-
-    function abrirOrderManagementSaoBento() {
-      const agora = getLocalISOString(new Date());
-      const url = new URL("https://perform.lyzer.tech/pt/app/operations/order-management");
+      const url = new URL("https://perform.lyzer.tech/pt/app/operations/live-operations");
       url.searchParams.append("dateRange[from]", agora);
       url.searchParams.append("stores", "244");
       const statuses = ["Pending", "InAssignment", "Open", "Invoicing", "Processing", "Complete", "InTransit", "Incidence"];
