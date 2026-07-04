@@ -11,13 +11,20 @@
     <h1>Ferramentas de Operações</h1>
     <div class="coluna">
       <h2>Geral</h2>
+      <div class="order-input-group">
+        <input type="text" id="numeroEncomendaGeral" placeholder="Nº da Encomenda" aria-label="Número da Encomenda" aria-describedby="erroEncomendaGeral" class="order-input" />
+        <button class="btn-primary btn-add" onclick="pesquisarEncomenda()">Pesquisar</button>
+      </div>
+      <div id="erroEncomendaGeral" class="visually-hidden" aria-live="polite" style="color: #dc3545; font-size: 0.9rem; margin-top: -5px; margin-bottom: 10px;"></div>
+
       <button class="btn-primary" onclick="window.open('aviso_atraso.html', '_blank')">Avisar cliente sobre atraso</button>
       <button class="btn-primary" onclick="window.open('comunicacao_bot.html', '_blank')">Comunicação Com Bot</button>
       <button class="btn-primary" onclick="window.open('mapa_emel.html', '_blank')">Validar Mapa EMEL</button>
-      <h2>Rato</h2>
-      <button class="btn-primary" onclick="abrirLiveOperationsRato()">Rato - Em Direto</button>
       <button class="btn-primary" onclick="abrirMensagemWhatsApp()">Report Bloqueio POS</button>
       <button class="btn-primary" onclick="abrirPaginaContato()">E-mail Artigo Esquecido</button>
+
+      <h2>Rato</h2>
+      <button class="btn-primary" onclick="abrirLiveOperationsRato()">Rato - Em Direto</button>
       <button class="btn-primary" onclick="abrirRotaRato()">ROTA Rato</button>
       <h2>São Bento</h2>
       <button class="btn-primary" onclick="abrirLiveOperationsSaoBento()">São Bento - Em Direto</button>
@@ -26,6 +33,34 @@
   </div>
 
   <script>
+    function pesquisarEncomenda() {
+      const input = document.getElementById('numeroEncomendaGeral');
+      const erroElement = document.getElementById('erroEncomendaGeral');
+      const searchText = input.value.trim();
+
+      if (!searchText) {
+        erroElement.textContent = 'Por favor, insira o número da encomenda.';
+        erroElement.classList.remove('visually-hidden');
+        input.setAttribute('aria-invalid', 'true');
+        return;
+      }
+
+      erroElement.textContent = '';
+      erroElement.classList.add('visually-hidden');
+      input.setAttribute('aria-invalid', 'false');
+
+      const url = new URL("https://perform.lyzer.tech/pt/app/retail/orders");
+      url.searchParams.append("dateSearchFor", "deadline");
+      url.searchParams.append("dateRange[from]", "2026-01-01T00:00:00.000Z");
+      url.searchParams.append("dateRange[to]", new Date().toISOString());
+      url.searchParams.append("searchText", searchText);
+      url.searchParams.append("pageIndex", "1");
+      url.searchParams.append("pageSize", "20");
+      url.searchParams.append("sort", "deadline:desc");
+
+      window.open(url.toString(), "_blank");
+    }
+
     function abrirPaginaContato() {
       window.open("contact.html", "_blank");
     }
