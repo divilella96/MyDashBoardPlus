@@ -10,6 +10,15 @@
   <div class="container"> 
     <h1>Ferramentas de Operações</h1>
     <div class="coluna">
+      <h2>Extração de Dados Lyzer</h2>
+      <div class="order-input-group" style="flex-direction: column; align-items: stretch; gap: 10px; margin-bottom: 20px;">
+        <input type="email" id="lyzerEmail" placeholder="E-mail Lyzer" aria-label="E-mail Lyzer" class="order-input" />
+        <input type="password" id="lyzerPassword" placeholder="Senha Lyzer" aria-label="Senha Lyzer" class="order-input" />
+        <button class="btn-primary btn-add" id="btnCrawler" onclick="rodarCrawler()">Extrair Dados Lyzer</button>
+      </div>
+      <div id="statusCrawler" aria-live="polite" style="font-size: 0.9rem; margin-bottom: 10px; min-height: 20px;"></div>
+      <pre id="resultadoCrawler" style="background: #f4f4f4; padding: 10px; border-radius: 4px; font-size: 0.8rem; overflow-x: auto; display: none;"></pre>
+
       <h2>Geral</h2>
       <div class="order-input-group">
         <input type="text" id="numeroEncomendaGeral" placeholder="Nº da Encomenda" aria-label="Número da Encomenda" aria-describedby="erroEncomendaGeral" class="order-input" />
@@ -147,6 +156,52 @@
       url.searchParams.append("pageIndex", "1");
       url.searchParams.append("pageSize", "20");
       window.open(url.toString(), "_blank");
+    }
+
+    async function rodarCrawler() {
+      const email = document.getElementById('lyzerEmail').value.trim();
+      const password = document.getElementById('lyzerPassword').value.trim();
+      const statusEl = document.getElementById('statusCrawler');
+      const resultadoEl = document.getElementById('resultadoCrawler');
+      const btnCrawler = document.getElementById('btnCrawler');
+
+      if (!email || !password) {
+        statusEl.textContent = 'Por favor, preencha o e-mail e a senha.';
+        statusEl.style.color = '#dc3545';
+        return;
+      }
+
+      statusEl.textContent = 'Iniciando extração... (isso pode levar alguns segundos)';
+      statusEl.style.color = '#007bff';
+      resultadoEl.style.display = 'none';
+      btnCrawler.disabled = true;
+
+      try {
+        const response = await fetch('http://localhost:3000/api/crawler', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          statusEl.textContent = 'Extração concluída com sucesso!';
+          statusEl.style.color = '#28a745';
+          resultadoEl.textContent = JSON.stringify(data.data, null, 2);
+          resultadoEl.style.display = 'block';
+        } else {
+          statusEl.textContent = 'Erro: ' + (data.error || 'Falha na extração');
+          statusEl.style.color = '#dc3545';
+        }
+      } catch (error) {
+        statusEl.textContent = 'Erro de conexão com o servidor local. O server.js está rodando?';
+        statusEl.style.color = '#dc3545';
+      } finally {
+        btnCrawler.disabled = false;
+      }
     }
   </script>
 </body>
