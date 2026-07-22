@@ -1,0 +1,85 @@
+const { chromium } = require('playwright');
+const fs = require('fs');
+
+(async () => {
+    const browser = await chromium.launch({ headless: false });
+    const page = await browser.newPage();
+
+    console.log('Iniciando o crawler...');
+
+    try {
+        // Login
+        await page.goto('https://perform.lyzer.tech/login');
+
+        // Preenchendo o email, senha e clicando no botão de entrar (seletores identificados)
+        await page.fill('#email', 'seu_email');
+        await page.fill('#password', 'sua_senha');
+        await page.click('button[type="submit"]');
+        await page.waitForLoadState('networkidle');
+
+        // Página principal
+        await page.goto('https://perform.lyzer.tech/pt/app/retail/orders?dateSearchFor=deadline&pageIndex=1&pageSize=50');
+        await page.waitForLoadState('networkidle');
+
+        const dadosRelatorio = [];
+
+        // Captura de IDs
+        // NOTA PARA O USUÁRIO: O HTML da lista de encomendas não foi fornecido.
+        // Substitua 'SELETOR_DA_COLUNA_ID' pelo seletor CSS correto que aponta para os elementos contendo os IDs das encomendas.
+        const linksLocator = page.locator('SELETOR_DA_COLUNA_ID');
+        const idsEncomendas = await linksLocator.allInnerTexts();
+
+        for (let orderId of idsEncomendas) {
+            orderId = orderId.trim();
+            if (!orderId) continue;
+
+            console.log(`Processando encomenda: ${orderId}`);
+
+            const urlEncomenda = `https://perform.lyzer.tech/pt/track/${orderId}`;
+            await page.goto(urlEncomenda);
+            await page.waitForLoadState('networkidle');
+
+            // Extração via CSS Grid
+            const produtosEncontrados = await page.evaluate(() => {
+                const grid = document.querySelector('.grid.grid-cols-\\[auto\\,1fr\\,auto\\,auto\\]');
+                if (!grid) return [];
+
+                const nodesNomes = grid.querySelectorAll('div.w-full.content-center:not(.col-span-2) > span.typography-p-ui');
+                const nodesQuantidades = grid.querySelectorAll('div.w-full.text-center.content-center > div > span.typography-p-ui');
+
+                const resultados = [];
+                for (let i = 0; i < nodesNomes.length; i++) {
+                    resultados.push({
+                        nome: nodesNomes[i].innerText.trim(),
+                        quantidadeTexto: nodesQuantidades[i] ? nodesQuantidades[i].innerText.trim() : '0'
+                    });
+                }
+                return resultados;
+            });
+
+            let totalItens = 0;
+            const listaNomes = [];
+
+            for (const prod of produtosEncontrados) {
+                const qtdNumero = parseInt(prod.quantidadeTexto, 10) || 0;
+                totalItens += qtdNumero;
+                listaNomes.push(`${prod.nome} (${prod.quantidadeTexto})`);
+            }
+
+            dadosRelatorio.push({
+                encomenda: orderId,
+                produtosDiferentes: produtosEncontrados.length,
+                quantidadeTotal: totalItens,
+                listaCompleta: listaNomes.join(' | ')
+            });
+        }
+
+        fs.writeFileSync('dados_encomendas.json', JSON.stringify(dadosRelatorio, null, 2), 'utf-8');
+        console.log('Extração concluída com sucesso!');
+
+    } catch (error) {
+        console.error('Erro durante a execução:', error);
+    } finally {
+        await browser.close();
+    }
+})();
