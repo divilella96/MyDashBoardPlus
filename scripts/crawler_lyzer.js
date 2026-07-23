@@ -9,17 +9,21 @@ const fs = require('fs');
 
     try {
         // Login
-        await page.goto('https://perform.lyzer.tech/pt');
+        await page.goto('https://perform.lyzer.tech/pt', { waitUntil: 'domcontentloaded' });
 
         // Preenchendo o email, senha e clicando no botão de entrar (seletores identificados)
         await page.fill('#email', 'seu_email');
         await page.fill('#password', 'sua_senha');
         await page.click('button[type="submit"]');
-        await page.waitForLoadState('networkidle');
+
+        try {
+            await page.waitForURL('**/app/retail/orders**', { timeout: 15000 });
+        } catch (e) {
+            console.warn("Demora no login, prosseguindo...");
+        }
 
         // Página principal
-        await page.goto('https://perform.lyzer.tech/pt/app/retail/orders?dateSearchFor=deadline&pageIndex=1&pageSize=50');
-        await page.waitForLoadState('networkidle');
+        await page.goto('https://perform.lyzer.tech/pt/app/retail/orders?dateSearchFor=deadline&pageIndex=1&pageSize=50', { waitUntil: 'domcontentloaded' });
 
         const dadosRelatorio = [];
 
@@ -38,8 +42,13 @@ const fs = require('fs');
 
             console.log(`Processando encomenda: ${text} (${href})`);
 
-            await page.goto(href);
-            await page.waitForLoadState('networkidle');
+            await page.goto(href, { waitUntil: 'domcontentloaded' });
+
+            try {
+                await page.waitForSelector('div.w-full.text-center.content-center.items-center.p-2.flex.justify-center', { state: 'attached', timeout: 10000 });
+            } catch (e) {
+                console.warn(`Aviso: Tempo esgotado ao esperar por produtos na encomenda ${text}.`);
+            }
 
             // Extração via CSS Grid
             const produtosEncontrados = await page.evaluate(() => {
