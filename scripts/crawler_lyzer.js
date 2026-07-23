@@ -55,9 +55,15 @@ const DATA_FIM = '';    // ex: '2026-07-22'
         const linksLocator = page.locator('td[headers="column-id"] a');
 
         // Extrai o texto visível e o href do DOM
-        const linksEncomendas = await linksLocator.evaluateAll(elements =>
-            elements.map(el => ({ text: el.innerText.trim(), href: el.href }))
-        );
+        let linksEncomendas = [];
+        try {
+            await linksLocator.first().waitFor({ state: 'attached', timeout: 15000 });
+            linksEncomendas = await linksLocator.evaluateAll(elements =>
+                elements.map(el => ({ text: el.innerText.trim(), href: el.href }))
+            );
+        } catch (e) {
+            console.warn("Nenhuma encomenda encontrada (lista vazia para o período selecionado).");
+        }
 
         for (let encomendaInfo of linksEncomendas) {
             const { text, href } = encomendaInfo;

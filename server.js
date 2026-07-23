@@ -77,8 +77,8 @@ app.post('/api/crawler', async (req, res) => {
                 elements.map(el => ({ text: el.innerText.trim(), href: el.href }))
             );
         } catch (e) {
-             console.warn("Lista de encomendas vazia ou seletor não encontrado.");
-             throw new Error("Nenhuma encomenda encontrada na lista ou página demorou a carregar.");
+             console.warn("Lista de encomendas vazia para o período selecionado ou página demorou a carregar.");
+             // Em vez de dar erro (throw new Error), prosseguimos para retornar um array vazio [].
         }
 
 
