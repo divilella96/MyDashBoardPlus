@@ -1,6 +1,11 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
 
+// Variáveis opcionais de data (formato YYYY-MM-DD)
+// Deixe vazio para não filtrar por data
+const DATA_INICIO = ''; // ex: '2026-05-31'
+const DATA_FIM = '';    // ex: '2026-07-22'
+
 (async () => {
     const browser = await chromium.launch({ headless: false });
     const page = await browser.newPage();
@@ -22,8 +27,20 @@ const fs = require('fs');
             console.warn("Demora no login, prosseguindo...");
         }
 
+        // Montar a URL com os parâmetros de data, se fornecidos
+        let ordersUrl = 'https://perform.lyzer.tech/pt/app/retail/orders?dateSearchFor=deadline&pageIndex=1&pageSize=50';
+
+        if (DATA_INICIO) {
+            ordersUrl += `&dateRange%5Bfrom%5D=${DATA_INICIO}T00:00:00.000Z`;
+        }
+        if (DATA_FIM) {
+            ordersUrl += `&dateRange%5Bto%5D=${DATA_FIM}T23:59:59.999Z`;
+        }
+
+        console.log(`Carregando página de encomendas: ${ordersUrl}`);
+
         // Página principal
-        await page.goto('https://perform.lyzer.tech/pt/app/retail/orders?dateSearchFor=deadline&pageIndex=1&pageSize=50', { waitUntil: 'domcontentloaded' });
+        await page.goto(ordersUrl, { waitUntil: 'domcontentloaded' });
 
         const dadosRelatorio = [];
 

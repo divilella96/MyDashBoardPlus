@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 app.post('/api/crawler', async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, dateFrom, dateTo } = req.body;
 
     if (!email || !password) {
         return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
@@ -41,8 +41,19 @@ app.post('/api/crawler', async (req, res) => {
             }
         }
 
+        // Montar a URL com os parâmetros de data, se fornecidos
+        let ordersUrl = 'https://perform.lyzer.tech/pt/app/retail/orders?dateSearchFor=deadline&pageIndex=1&pageSize=50';
+
+        if (dateFrom) {
+            ordersUrl += `&dateRange%5Bfrom%5D=${dateFrom}T00:00:00.000Z`;
+        }
+        if (dateTo) {
+            ordersUrl += `&dateRange%5Bto%5D=${dateTo}T23:59:59.999Z`;
+        }
+
+        console.log(`Carregando página de encomendas: ${ordersUrl}`);
         // Página principal de encomendas (garantindo os parametros)
-        await page.goto('https://perform.lyzer.tech/pt/app/retail/orders?dateSearchFor=deadline&pageIndex=1&pageSize=50', { waitUntil: 'domcontentloaded' });
+        await page.goto(ordersUrl, { waitUntil: 'domcontentloaded' });
 
         const dadosRelatorio = [];
 
