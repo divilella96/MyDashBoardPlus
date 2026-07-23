@@ -25,24 +25,24 @@ app.post('/api/crawler', async (req, res) => {
         const page = await browser.newPage();
 
         // Login
-        await page.goto('https://perform.lyzer.tech/pt');
+        await page.goto('https://perform.lyzer.tech/pt', { waitUntil: 'domcontentloaded' });
         await page.fill('#email', email);
         await page.fill('#password', password);
         await page.click('button[type="submit"]');
 
-        // Wait for login to complete (adjust if there's a better specific element to wait for)
-        await page.waitForLoadState('networkidle');
-
-        // Check if login failed (basic check - could be improved based on actual site behavior)
-        const url = page.url();
-        if (url.includes('login')) {
-             throw new Error("Falha no login. Verifique as credenciais.");
+        // Em vez de networkidle (que pode travar por 30s devido a scripts em background),
+        // esperamos que a página mude de URL ou um elemento da página de encomendas apareça
+        try {
+            await page.waitForURL('**/app/retail/orders**', { timeout: 15000 });
+        } catch (e) {
+            // Check if login failed (basic check)
+            if (page.url().includes('login')) {
+                 throw new Error("Falha no login. Verifique as credenciais.");
+            }
         }
 
-
-        // Página principal de encomendas
-        await page.goto('https://perform.lyzer.tech/pt/app/retail/orders?dateSearchFor=deadline&pageIndex=1&pageSize=50');
-        await page.waitForLoadState('networkidle');
+        // Página principal de encomendas (garantindo os parametros)
+        await page.goto('https://perform.lyzer.tech/pt/app/retail/orders?dateSearchFor=deadline&pageIndex=1&pageSize=50', { waitUntil: 'domcontentloaded' });
 
         const dadosRelatorio = [];
 
@@ -70,8 +70,14 @@ app.post('/api/crawler', async (req, res) => {
 
             console.log(`Processando encomenda: ${text} (${href})`);
 
-            await page.goto(href);
-            await page.waitForLoadState('networkidle');
+            await page.goto(href, { waitUntil: 'domcontentloaded' });
+
+            // Espera pelo contêiner de imagem de produto para garantir que carregou
+            try {
+                await page.waitForSelector('div.w-full.text-center.content-center.items-center.p-2.flex.justify-center', { state: 'attached', timeout: 10000 });
+            } catch (e) {
+                console.warn(`Aviso: Tempo esgotado ao esperar por produtos na encomenda ${text}. Pode estar vazia ou a carregar lentamente.`);
+            }
 
             // Extração via CSS Grid
             const produtosEncontrados = await page.evaluate(() => {
