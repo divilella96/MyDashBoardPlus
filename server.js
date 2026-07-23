@@ -49,7 +49,7 @@ app.post('/api/crawler', async (req, res) => {
         // Captura de IDs
         // NOTA PARA O USUÁRIO: O HTML da lista de encomendas não foi fornecido.
         // Substitua 'SELETOR_DA_COLUNA_ID' pelo seletor CSS correto na página.
-        const linksLocator = page.locator('SELETOR_DA_COLUNA_ID');
+        const linksLocator = page.locator(' <th role="columnheader" scope="col" class="h-12 p-4 text-left align-middle typography-table [&amp;:has([role=checkbox])]:pr-0 ');
 
         // Timeout para não travar o servidor eternamente se o seletor for falso.
         let idsEncomendas = [];
