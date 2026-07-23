@@ -14,6 +14,10 @@
       <div class="order-input-group" style="flex-direction: column; align-items: stretch; gap: 10px; margin-bottom: 20px;">
         <input type="email" id="lyzerEmail" placeholder="E-mail Lyzer" aria-label="E-mail Lyzer" class="order-input" />
         <input type="password" id="lyzerPassword" placeholder="Senha Lyzer" aria-label="Senha Lyzer" class="order-input" />
+        <div style="display: flex; gap: 10px;">
+          <input type="date" id="lyzerDateFrom" aria-label="Data Início" class="order-input" style="flex: 1;" title="Data Início" />
+          <input type="date" id="lyzerDateTo" aria-label="Data Fim" class="order-input" style="flex: 1;" title="Data Fim" />
+        </div>
         <button class="btn-primary btn-add" id="btnCrawler" onclick="rodarCrawler()">Extrair Dados Lyzer</button>
       </div>
       <div id="statusCrawler" aria-live="polite" style="font-size: 0.9rem; margin-bottom: 10px; min-height: 20px;"></div>
@@ -161,6 +165,8 @@
     async function rodarCrawler() {
       const email = document.getElementById('lyzerEmail').value.trim();
       const password = document.getElementById('lyzerPassword').value.trim();
+      const dateFrom = document.getElementById('lyzerDateFrom').value;
+      const dateTo = document.getElementById('lyzerDateTo').value;
       const statusEl = document.getElementById('statusCrawler');
       const resultadoEl = document.getElementById('resultadoCrawler');
       const btnCrawler = document.getElementById('btnCrawler');
@@ -182,7 +188,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ email, password, dateFrom, dateTo })
         });
 
         const data = await response.json();
