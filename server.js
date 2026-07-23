@@ -46,29 +46,31 @@ app.post('/api/crawler', async (req, res) => {
 
         const dadosRelatorio = [];
 
-        // Captura de IDs
-        // O HTML da coluna tem td com headers="column-id" que contém a tag <a> com o ID
+        // Captura de URLs
+        // O HTML da coluna tem td com headers="column-id" que contém a tag <a> com o link completo
         const linksLocator = page.locator('td[headers="column-id"] a');
 
         // Timeout para não travar o servidor eternamente se a lista estiver vazia.
-        let idsEncomendas = [];
+        let linksEncomendas = [];
         try {
             await linksLocator.first().waitFor({ state: 'attached', timeout: 15000 });
-            idsEncomendas = await linksLocator.allInnerTexts();
+            // Extrai o texto visível (ID curto) e o href (link completo)
+            linksEncomendas = await linksLocator.evaluateAll(elements =>
+                elements.map(el => ({ text: el.innerText.trim(), href: el.href }))
+            );
         } catch (e) {
              console.warn("Lista de encomendas vazia ou seletor não encontrado.");
              throw new Error("Nenhuma encomenda encontrada na lista ou página demorou a carregar.");
         }
 
 
-        for (let orderId of idsEncomendas) {
-            orderId = orderId.trim();
-            if (!orderId) continue;
+        for (let encomendaInfo of linksEncomendas) {
+            const { text, href } = encomendaInfo;
+            if (!href) continue;
 
-            console.log(`Processando encomenda: ${orderId}`);
+            console.log(`Processando encomenda: ${text} (${href})`);
 
-            const urlEncomenda = `https://perform.lyzer.tech/pt/track/${orderId}`;
-            await page.goto(urlEncomenda);
+            await page.goto(href);
             await page.waitForLoadState('networkidle');
 
             // Extração via CSS Grid
@@ -100,7 +102,8 @@ app.post('/api/crawler', async (req, res) => {
             }
 
             dadosRelatorio.push({
-                encomenda: orderId,
+                encomenda: text, // O ID curto que aparece na tabela
+                link: href,      // Link completo para rastreio
                 produtosDiferentes: produtosEncontrados.length,
                 quantidadeTotal: totalItens,
                 listaCompleta: listaNomes.join(' | ')

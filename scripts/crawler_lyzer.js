@@ -23,19 +23,22 @@ const fs = require('fs');
 
         const dadosRelatorio = [];
 
-        // Captura de IDs
-        // O HTML da coluna tem td com headers="column-id" que contém a tag <a> com o ID
+        // Captura de URLs
+        // O HTML da coluna tem td com headers="column-id" que contém a tag <a> com o ID e href completos
         const linksLocator = page.locator('td[headers="column-id"] a');
-        const idsEncomendas = await linksLocator.allInnerTexts();
 
-        for (let orderId of idsEncomendas) {
-            orderId = orderId.trim();
-            if (!orderId) continue;
+        // Extrai o texto visível e o href do DOM
+        const linksEncomendas = await linksLocator.evaluateAll(elements =>
+            elements.map(el => ({ text: el.innerText.trim(), href: el.href }))
+        );
 
-            console.log(`Processando encomenda: ${orderId}`);
+        for (let encomendaInfo of linksEncomendas) {
+            const { text, href } = encomendaInfo;
+            if (!href) continue;
 
-            const urlEncomenda = `https://perform.lyzer.tech/pt/track/${orderId}`;
-            await page.goto(urlEncomenda);
+            console.log(`Processando encomenda: ${text} (${href})`);
+
+            await page.goto(href);
             await page.waitForLoadState('networkidle');
 
             // Extração via CSS Grid
@@ -67,7 +70,8 @@ const fs = require('fs');
             }
 
             dadosRelatorio.push({
-                encomenda: orderId,
+                encomenda: text,
+                link: href,
                 produtosDiferentes: produtosEncontrados.length,
                 quantidadeTotal: totalItens,
                 listaCompleta: listaNomes.join(' | ')
