@@ -9,7 +9,7 @@ const fs = require('fs');
 
     try {
         // Login
-        await page.goto('https://perform.lyzer.tech/login');
+        await page.goto('https://perform.lyzer.tech/pt');
 
         // Preenchendo o email, senha e clicando no botão de entrar (seletores identificados)
         await page.fill('#email', 'seu_email');
@@ -24,9 +24,8 @@ const fs = require('fs');
         const dadosRelatorio = [];
 
         // Captura de IDs
-        // NOTA PARA O USUÁRIO: O HTML da lista de encomendas não foi fornecido.
-        // Substitua 'SELETOR_DA_COLUNA_ID' pelo seletor CSS correto que aponta para os elementos contendo os IDs das encomendas.
-        const linksLocator = page.locator('SELETOR_DA_COLUNA_ID');
+        // O HTML da coluna tem td com headers="column-id" que contém a tag <a> com o ID
+        const linksLocator = page.locator('td[headers="column-id"] a');
         const idsEncomendas = await linksLocator.allInnerTexts();
 
         for (let orderId of idsEncomendas) {
