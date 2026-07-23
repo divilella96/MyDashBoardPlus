@@ -47,19 +47,17 @@ app.post('/api/crawler', async (req, res) => {
         const dadosRelatorio = [];
 
         // Captura de IDs
-        // NOTA PARA O USUÁRIO: O HTML da lista de encomendas não foi fornecido.
-        // Substitua 'SELETOR_DA_COLUNA_ID' pelo seletor CSS correto na página.
-        const linksLocator = page.locator('SELETOR_DA_COLUNA_ID');
+        // O HTML da coluna tem td com headers="column-id" que contém a tag <a> com o ID
+        const linksLocator = page.locator('td[headers="column-id"] a');
 
-        // Timeout para não travar o servidor eternamente se o seletor for falso.
+        // Timeout para não travar o servidor eternamente se a lista estiver vazia.
         let idsEncomendas = [];
         try {
-            await linksLocator.first().waitFor({ state: 'attached', timeout: 5000 });
+            await linksLocator.first().waitFor({ state: 'attached', timeout: 15000 });
             idsEncomendas = await linksLocator.allInnerTexts();
         } catch (e) {
-             console.warn("Seletor 'SELETOR_DA_COLUNA_ID' não encontrado ou vazio. Simulando/continuando vazio.");
-             // Aqui retornaremos erro para que o frontend mostre que precisa do seletor correto
-             throw new Error("Seletor da coluna de ID não configurado no backend ou lista vazia.");
+             console.warn("Lista de encomendas vazia ou seletor não encontrado.");
+             throw new Error("Nenhuma encomenda encontrada na lista ou página demorou a carregar.");
         }
 
 
