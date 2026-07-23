@@ -27,16 +27,22 @@ const DATA_FIM = '';    // ex: '2026-07-22'
             console.warn("Demora no login, prosseguindo...");
         }
 
-        // Montar a URL com os parâmetros de data, se fornecidos
-        let ordersUrl = 'https://perform.lyzer.tech/pt/app/retail/orders?dateSearchFor=deadline&pageIndex=1&pageSize=50';
+        // Montar a URL com os parâmetros via URLSearchParams para garantir o encoding correto
+        const urlObj = new URL('https://perform.lyzer.tech/pt/app/retail/orders');
+        urlObj.searchParams.append('dateSearchFor', 'deadline');
 
         if (DATA_INICIO) {
-            ordersUrl += `&dateRange%5Bfrom%5D=${DATA_INICIO}T00:00:00.000Z`;
+            urlObj.searchParams.append('dateRange[from]', `${DATA_INICIO}T00:00:00.000Z`);
         }
         if (DATA_FIM) {
-            ordersUrl += `&dateRange%5Bto%5D=${DATA_FIM}T23:59:59.999Z`;
+            urlObj.searchParams.append('dateRange[to]', `${DATA_FIM}T23:59:59.999Z`);
         }
 
+        urlObj.searchParams.append('pageIndex', '1');
+        urlObj.searchParams.append('pageSize', '50');
+        urlObj.searchParams.append('sort', 'deadline:desc');
+
+        const ordersUrl = urlObj.toString();
         console.log(`Carregando página de encomendas: ${ordersUrl}`);
 
         // Página principal
