@@ -40,19 +40,20 @@ const fs = require('fs');
 
             // Extração via CSS Grid
             const produtosEncontrados = await page.evaluate(() => {
-                const grid = document.querySelector('.grid.grid-cols-\\[auto\\,1fr\\,auto\\,auto\\]');
-                if (!grid) return [];
-
-                const nodesNomes = grid.querySelectorAll('div.w-full.content-center:not(.col-span-2) > span.typography-p-ui');
-                const nodesQuantidades = grid.querySelectorAll('div.w-full.text-center.content-center > div > span.typography-p-ui');
-
+                const productImages = document.querySelectorAll('div.w-full.text-center.content-center.items-center.p-2.flex.justify-center');
                 const resultados = [];
-                for (let i = 0; i < nodesNomes.length; i++) {
-                    resultados.push({
-                        nome: nodesNomes[i].innerText.trim(),
-                        quantidadeTexto: nodesQuantidades[i] ? nodesQuantidades[i].innerText.trim() : '0'
-                    });
-                }
+
+                productImages.forEach(imgDiv => {
+                    const nameDiv = imgDiv.nextElementSibling;
+                    const qtyDiv = nameDiv ? nameDiv.nextElementSibling : null;
+
+                    if (nameDiv && qtyDiv) {
+                        resultados.push({
+                            nome: nameDiv.innerText.trim(),
+                            quantidadeTexto: qtyDiv.innerText.trim() || '0'
+                        });
+                    }
+                });
                 return resultados;
             });
 
