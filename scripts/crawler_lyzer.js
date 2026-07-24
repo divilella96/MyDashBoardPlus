@@ -112,12 +112,33 @@ const DATA_FIM = '';    // ex: '2026-07-22'
                 link: href,
                 produtosDiferentes: produtosEncontrados.length,
                 quantidadeTotal: totalItens,
-                listaCompleta: listaNomes.join(' | ')
+                listaCompleta: listaNomes.join(' | '),
+                produtosDetalhes: produtosEncontrados
             });
         }
 
-        fs.writeFileSync('dados_encomendas.json', JSON.stringify(dadosRelatorio, null, 2), 'utf-8');
-        console.log('Extração concluída com sucesso!');
+        const jsonPath = 'dados_encomendas.json';
+        let historico = [];
+        if (fs.existsSync(jsonPath)) {
+            try {
+                const fileData = fs.readFileSync(jsonPath, 'utf-8');
+                historico = JSON.parse(fileData);
+            } catch (err) {
+                console.error("Erro ao ler o histórico existente. Criando um novo.", err);
+            }
+        }
+
+        dadosRelatorio.forEach(novaEncomenda => {
+            const index = historico.findIndex(enc => enc.encomenda === novaEncomenda.encomenda);
+            if (index !== -1) {
+                historico[index] = novaEncomenda;
+            } else {
+                historico.push(novaEncomenda);
+            }
+        });
+
+        fs.writeFileSync(jsonPath, JSON.stringify(historico, null, 2), 'utf-8');
+        console.log('Extração concluída e guardada no histórico com sucesso!');
 
     } catch (error) {
         console.error('Erro durante a execução:', error);
