@@ -26,19 +26,6 @@
       <div id="statusCrawler" aria-live="polite" style="font-size: 0.9rem; margin-bottom: 10px; min-height: 20px;"></div>
       <pre id="resultadoCrawler" style="background: #f4f4f4; padding: 10px; border-radius: 4px; font-size: 0.8rem; overflow-x: auto; display: none;"></pre>
 
-      <div id="tabelaTopProdutosContainer" style="display: none; margin-bottom: 20px;">
-        <h3>Top 20 Produtos</h3>
-        <table style="width: 100%; text-align: left; border-collapse: collapse; font-size: 0.9rem;">
-          <thead>
-            <tr style="border-bottom: 1px solid #ccc;">
-              <th style="padding: 5px;">Produto</th>
-              <th style="padding: 5px; width: 100px;">Qtd Total</th>
-            </tr>
-          </thead>
-          <tbody id="tabelaTopProdutosBody"></tbody>
-        </table>
-      </div>
-
       <h2>Geral</h2>
       <div class="order-input-group">
         <input type="text" id="numeroEncomendaGeral" placeholder="Nº da Encomenda" aria-label="Número da Encomenda" aria-describedby="erroEncomendaGeral" class="order-input" />
@@ -61,7 +48,24 @@
     </div>
   </div>
 
+  <!-- Modal Top 20 -->
+  <div id="top20Modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 style="margin: 0; color: var(--primary-color);">Top 20 Produtos</h2>
+        <button class="btn-close" onclick="fecharModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <ul id="listaTopProdutos" class="ranking-list"></ul>
+      </div>
+    </div>
+  </div>
+
   <script>
+    function fecharModal() {
+      document.getElementById('top20Modal').classList.remove('active');
+    }
+
     function pesquisarEncomenda() {
       const input = document.getElementById('numeroEncomendaGeral');
       const erroElement = document.getElementById('erroEncomendaGeral');
@@ -228,14 +232,13 @@
 
     async function verTop20() {
       const statusEl = document.getElementById('statusCrawler');
-      const tabelaContainer = document.getElementById('tabelaTopProdutosContainer');
-      const tabelaBody = document.getElementById('tabelaTopProdutosBody');
+      const listaProdutos = document.getElementById('listaTopProdutos');
+      const modal = document.getElementById('top20Modal');
       const resultadoEl = document.getElementById('resultadoCrawler');
       const btnTop20 = document.getElementById('btnTop20');
 
       statusEl.textContent = 'Carregando ranking...';
       statusEl.style.color = '#007bff';
-      tabelaContainer.style.display = 'none';
       resultadoEl.style.display = 'none';
       btnTop20.disabled = true;
 
@@ -244,21 +247,34 @@
         const data = await response.json();
 
         if (response.ok) {
-          statusEl.textContent = 'Ranking carregado com sucesso!';
-          statusEl.style.color = '#28a745';
+          statusEl.textContent = '';
+          listaProdutos.innerHTML = '';
 
-          tabelaBody.innerHTML = '';
           if (data.data.length === 0) {
-            tabelaBody.innerHTML = '<tr><td colspan="2" style="padding: 5px; text-align: center;">Nenhum produto encontrado no histórico.</td></tr>';
+            listaProdutos.innerHTML = '<li style="text-align: center; color: #666;">Nenhum produto encontrado no histórico.</li>';
           } else {
-            data.data.forEach(prod => {
-              const tr = document.createElement('tr');
-              tr.style.borderBottom = '1px solid #eee';
-              tr.innerHTML = \`<td style="padding: 5px;">\${prod.nome}</td><td style="padding: 5px;">\${prod.quantidadeTotal}</td>\`;
-              tabelaBody.appendChild(tr);
+            data.data.forEach((prod, index) => {
+              const li = document.createElement('li');
+              const posicao = index + 1;
+
+              let rankClass = '';
+              if (posicao === 1) rankClass = 'rank-1';
+              else if (posicao === 2) rankClass = 'rank-2';
+              else if (posicao === 3) rankClass = 'rank-3';
+              else rankClass = 'rank-other';
+
+              li.className = rankClass;
+              li.innerHTML = `
+                <span class="rank-position">${posicao}º</span>
+                <span class="product-name">${prod.nome}</span>
+                <span class="product-qty">${prod.quantidadeTotal} unid.</span>
+              `;
+              listaProdutos.appendChild(li);
             });
           }
-          tabelaContainer.style.display = 'block';
+
+          modal.classList.add('active');
+
         } else {
           statusEl.textContent = 'Erro: ' + (data.error || 'Falha ao buscar top produtos');
           statusEl.style.color = '#dc3545';
