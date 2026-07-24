@@ -130,15 +130,38 @@ app.post('/api/crawler', async (req, res) => {
                 link: href,      // Link completo para rastreio
                 produtosDiferentes: produtosEncontrados.length,
                 quantidadeTotal: totalItens,
-                listaCompleta: listaNomes.join(' | ')
+                listaCompleta: listaNomes.join(' | '),
+                produtosDetalhes: produtosEncontrados // Para o cálculo do Top 20
             });
         }
 
+        // Append to existing file or create new
+        const jsonPath = path.join(__dirname, 'dados_encomendas.json');
+        let historico = [];
+        if (fs.existsSync(jsonPath)) {
+            try {
+                const fileData = fs.readFileSync(jsonPath, 'utf-8');
+                historico = JSON.parse(fileData);
+            } catch (err) {
+                console.error("Erro ao ler o histórico existente. Criando um novo.", err);
+            }
+        }
+
+        // Adiciona novos itens, atualizando encomendas existentes se necessário
+        dadosRelatorio.forEach(novaEncomenda => {
+            const index = historico.findIndex(enc => enc.encomenda === novaEncomenda.encomenda);
+            if (index !== -1) {
+                historico[index] = novaEncomenda;
+            } else {
+                historico.push(novaEncomenda);
+            }
+        });
+
         // Save to file for caching/historical record
-        fs.writeFileSync(path.join(__dirname, 'dados_encomendas.json'), JSON.stringify(dadosRelatorio, null, 2), 'utf-8');
+        fs.writeFileSync(jsonPath, JSON.stringify(historico, null, 2), 'utf-8');
 
         console.log('Extração concluída com sucesso!');
-        res.json({ success: true, data: dadosRelatorio });
+        res.json({ success: true, data: historico });
 
     } catch (error) {
         console.error('Erro durante a execução do crawler:', error);
@@ -147,6 +170,47 @@ app.post('/api/crawler', async (req, res) => {
         if (browser) {
             await browser.close();
         }
+    }
+});
+
+app.get('/api/top-produtos', (req, res) => {
+    const jsonPath = path.join(__dirname, 'dados_encomendas.json');
+    if (!fs.existsSync(jsonPath)) {
+        return res.json({ success: true, data: [] });
+    }
+
+    try {
+        const fileData = fs.readFileSync(jsonPath, 'utf-8');
+        const historico = JSON.parse(fileData);
+        const contagemProdutos = {};
+
+        historico.forEach(encomenda => {
+            if (encomenda.produtosDetalhes) {
+                encomenda.produtosDetalhes.forEach(prod => {
+                    const nome = prod.nome;
+                    // Tenta extrair o número principal da string de quantidade (ex: "2/3" -> 2, "0.5/0.45 Kg" -> 0.5, "1" -> 1)
+                    // Usando um regex simples para extrair o primeiro número que aparecer
+                    const qtdMatch = prod.quantidadeTexto.match(/[\d.]+/);
+                    const qtd = qtdMatch ? parseFloat(qtdMatch[0]) : 1;
+
+                    if (!contagemProdutos[nome]) {
+                        contagemProdutos[nome] = 0;
+                    }
+                    contagemProdutos[nome] += qtd;
+                });
+            }
+        });
+
+        // Converte o objeto em um array, ordena e pega o top 20
+        const topProdutos = Object.keys(contagemProdutos)
+            .map(nome => ({ nome, quantidadeTotal: contagemProdutos[nome] }))
+            .sort((a, b) => b.quantidadeTotal - a.quantidadeTotal)
+            .slice(0, 20);
+
+        res.json({ success: true, data: topProdutos });
+    } catch (error) {
+        console.error('Erro ao calcular top produtos:', error);
+        res.status(500).json({ success: false, error: 'Erro ao calcular top produtos.' });
     }
 });
 

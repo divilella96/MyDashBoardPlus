@@ -18,10 +18,26 @@
           <input type="date" id="lyzerDateFrom" aria-label="Data Início" class="order-input" style="flex: 1;" title="Data Início" />
           <input type="date" id="lyzerDateTo" aria-label="Data Fim" class="order-input" style="flex: 1;" title="Data Fim" />
         </div>
-        <button class="btn-primary btn-add" id="btnCrawler" onclick="rodarCrawler()">Extrair Dados Lyzer</button>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-primary btn-add" id="btnCrawler" onclick="rodarCrawler()" style="flex: 1;">Extrair Dados</button>
+          <button class="btn-secondary" id="btnTop20" onclick="verTop20()" style="flex: 1;">Ver Top 20 Produtos</button>
+        </div>
       </div>
       <div id="statusCrawler" aria-live="polite" style="font-size: 0.9rem; margin-bottom: 10px; min-height: 20px;"></div>
       <pre id="resultadoCrawler" style="background: #f4f4f4; padding: 10px; border-radius: 4px; font-size: 0.8rem; overflow-x: auto; display: none;"></pre>
+
+      <div id="tabelaTopProdutosContainer" style="display: none; margin-bottom: 20px;">
+        <h3>Top 20 Produtos</h3>
+        <table style="width: 100%; text-align: left; border-collapse: collapse; font-size: 0.9rem;">
+          <thead>
+            <tr style="border-bottom: 1px solid #ccc;">
+              <th style="padding: 5px;">Produto</th>
+              <th style="padding: 5px; width: 100px;">Qtd Total</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaTopProdutosBody"></tbody>
+        </table>
+      </div>
 
       <h2>Geral</h2>
       <div class="order-input-group">
@@ -207,6 +223,51 @@
         statusEl.style.color = '#dc3545';
       } finally {
         btnCrawler.disabled = false;
+      }
+    }
+
+    async function verTop20() {
+      const statusEl = document.getElementById('statusCrawler');
+      const tabelaContainer = document.getElementById('tabelaTopProdutosContainer');
+      const tabelaBody = document.getElementById('tabelaTopProdutosBody');
+      const resultadoEl = document.getElementById('resultadoCrawler');
+      const btnTop20 = document.getElementById('btnTop20');
+
+      statusEl.textContent = 'Carregando ranking...';
+      statusEl.style.color = '#007bff';
+      tabelaContainer.style.display = 'none';
+      resultadoEl.style.display = 'none';
+      btnTop20.disabled = true;
+
+      try {
+        const response = await fetch('http://localhost:3000/api/top-produtos');
+        const data = await response.json();
+
+        if (response.ok) {
+          statusEl.textContent = 'Ranking carregado com sucesso!';
+          statusEl.style.color = '#28a745';
+
+          tabelaBody.innerHTML = '';
+          if (data.data.length === 0) {
+            tabelaBody.innerHTML = '<tr><td colspan="2" style="padding: 5px; text-align: center;">Nenhum produto encontrado no histórico.</td></tr>';
+          } else {
+            data.data.forEach(prod => {
+              const tr = document.createElement('tr');
+              tr.style.borderBottom = '1px solid #eee';
+              tr.innerHTML = \`<td style="padding: 5px;">\${prod.nome}</td><td style="padding: 5px;">\${prod.quantidadeTotal}</td>\`;
+              tabelaBody.appendChild(tr);
+            });
+          }
+          tabelaContainer.style.display = 'block';
+        } else {
+          statusEl.textContent = 'Erro: ' + (data.error || 'Falha ao buscar top produtos');
+          statusEl.style.color = '#dc3545';
+        }
+      } catch (error) {
+        statusEl.textContent = 'Erro de conexão com o servidor local. O server.js está rodando?';
+        statusEl.style.color = '#dc3545';
+      } finally {
+        btnTop20.disabled = false;
       }
     }
   </script>
