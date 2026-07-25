@@ -67,7 +67,10 @@
     <div class="modal-content">
       <div class="modal-header">
         <h2 id="tituloModalTop20" style="margin: 0; color: var(--primary-color);">Top 20 Produtos</h2>
-        <button class="btn-close" onclick="fecharModal()">&times;</button>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-primary" id="btnExportarPdf" onclick="imprimirModal()" style="padding: 6px 12px; font-size: 0.9rem; width: auto;" title="Exportar lista para PDF via janela de impressão">PDF</button>
+          <button class="btn-close" onclick="fecharModal()">&times;</button>
+        </div>
       </div>
       <div class="modal-body">
         <ul id="listaTopProdutos" class="ranking-list"></ul>
@@ -78,6 +81,12 @@
   <script>
     function fecharModal() {
       document.getElementById('top20Modal').classList.remove('active');
+    }
+
+    function imprimirModal() {
+      // Dispara a janela de impressão nativa do navegador
+      // O CSS `@media print` será responsável por ocultar o resto da página
+      window.print();
     }
 
     function pesquisarEncomenda() {
