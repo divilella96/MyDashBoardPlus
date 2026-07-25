@@ -107,9 +107,15 @@ app.post('/api/crawler', async (req, res) => {
                     const qtyDiv = nameDiv ? nameDiv.nextElementSibling : null;
 
                     if (nameDiv && qtyDiv) {
+                        let qtyText = qtyDiv.innerText.trim() || '0';
+                        if (qtyText.includes('/')) {
+                            const parts = qtyText.split('/');
+                            qtyText = parts[parts.length - 1].trim();
+                        }
+
                         resultados.push({
                             nome: nameDiv.innerText.trim(),
-                            quantidadeTexto: qtyDiv.innerText.trim() || '0'
+                            quantidadeTexto: qtyText
                         });
                     }
                 });
@@ -149,7 +155,7 @@ app.post('/api/crawler', async (req, res) => {
 
         // Adiciona novos itens, atualizando encomendas existentes se necessário
         dadosRelatorio.forEach(novaEncomenda => {
-            const index = historico.findIndex(enc => enc.encomenda === novaEncomenda.encomenda);
+            const index = historico.findIndex(enc => enc.link === novaEncomenda.link);
             if (index !== -1) {
                 historico[index] = novaEncomenda;
             } else {
@@ -170,6 +176,65 @@ app.post('/api/crawler', async (req, res) => {
         if (browser) {
             await browser.close();
         }
+    }
+});
+
+app.post('/api/corrigir-json', (req, res) => {
+    const jsonPath = path.join(__dirname, 'dados_encomendas.json');
+    if (!fs.existsSync(jsonPath)) {
+        return res.json({ success: true, message: 'Nenhum histórico encontrado para corrigir.' });
+    }
+
+    try {
+        const fileData = fs.readFileSync(jsonPath, 'utf-8');
+        let historico = JSON.parse(fileData);
+        let correctedCount = 0;
+
+        // Deduplicate using link as primary key
+        const deduplicatedHistorico = [];
+        const seenLinks = new Set();
+
+        // Reverse iterate to keep the latest added/updated order in case of duplicates
+        for (let i = historico.length - 1; i >= 0; i--) {
+            const enc = historico[i];
+            if (!seenLinks.has(enc.link)) {
+                seenLinks.add(enc.link);
+                deduplicatedHistorico.unshift(enc); // Add to beginning to maintain original chronological order
+            }
+        }
+
+        historico = deduplicatedHistorico;
+
+        historico.forEach(encomenda => {
+            let totalItens = 0;
+            const listaNomes = [];
+
+            if (encomenda.produtosDetalhes) {
+                encomenda.produtosDetalhes.forEach(prod => {
+                    let qtyText = prod.quantidadeTexto || '0';
+                    if (qtyText.includes('/')) {
+                        const parts = qtyText.split('/');
+                        qtyText = parts[parts.length - 1].trim();
+                        prod.quantidadeTexto = qtyText;
+                        correctedCount++;
+                    }
+
+                    const qtdNumero = parseInt(prod.quantidadeTexto, 10) || 0;
+                    totalItens += qtdNumero;
+                    listaNomes.push(`${prod.nome} (${prod.quantidadeTexto})`);
+                });
+
+                encomenda.quantidadeTotal = totalItens;
+                encomenda.listaCompleta = listaNomes.join(' | ');
+            }
+        });
+
+        fs.writeFileSync(jsonPath, JSON.stringify(historico, null, 2), 'utf-8');
+        res.json({ success: true, message: `JSON corrigido com sucesso! ${historico.length} encomendas mantidas após deduplicação, ${correctedCount} quantidades atualizadas.` });
+
+    } catch (error) {
+        console.error('Erro ao corrigir o JSON:', error);
+        res.status(500).json({ success: false, error: 'Erro ao corrigir o JSON.' });
     }
 });
 

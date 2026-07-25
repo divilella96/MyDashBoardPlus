@@ -89,9 +89,15 @@ const DATA_FIM = '';    // ex: '2026-07-22'
                     const qtyDiv = nameDiv ? nameDiv.nextElementSibling : null;
 
                     if (nameDiv && qtyDiv) {
+                        let qtyText = qtyDiv.innerText.trim() || '0';
+                        if (qtyText.includes('/')) {
+                            const parts = qtyText.split('/');
+                            qtyText = parts[parts.length - 1].trim();
+                        }
+
                         resultados.push({
                             nome: nameDiv.innerText.trim(),
-                            quantidadeTexto: qtyDiv.innerText.trim() || '0'
+                            quantidadeTexto: qtyText
                         });
                     }
                 });
@@ -129,7 +135,7 @@ const DATA_FIM = '';    // ex: '2026-07-22'
         }
 
         dadosRelatorio.forEach(novaEncomenda => {
-            const index = historico.findIndex(enc => enc.encomenda === novaEncomenda.encomenda);
+            const index = historico.findIndex(enc => enc.link === novaEncomenda.link);
             if (index !== -1) {
                 historico[index] = novaEncomenda;
             } else {
