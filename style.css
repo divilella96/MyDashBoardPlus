@@ -410,3 +410,51 @@ form button {
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+
+/* Print Styles for PDF Export */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  /* Show only the modal */
+  #top20Modal, #top20Modal * {
+    visibility: visible;
+  }
+
+  /* Position the modal exactly at the top of the printed page */
+  #top20Modal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: none;
+    display: block; /* ensure it displays when active */
+  }
+
+  .modal-content {
+    width: 100%;
+    max-width: 100%;
+    box-shadow: none;
+    border-radius: 0;
+    border: none;
+  }
+
+  /* Hide the close and export buttons in the print */
+  #btnExportarPdf,
+  .btn-close {
+    display: none !important;
+  }
+
+  .modal-body {
+    overflow: visible; /* Prevent scrollbars in print */
+    padding: 0;
+  }
+
+  .ranking-list li {
+    border: 1px solid #ccc;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
