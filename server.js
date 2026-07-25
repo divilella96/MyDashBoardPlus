@@ -10,12 +10,30 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 
+let crawlerStatus = {
+    estado: 'Inativo',
+    encomendasLidas: 0,
+    totalEncomendas: 0,
+    erro: null
+};
+
+app.get('/api/crawler-status', (req, res) => {
+    res.json(crawlerStatus);
+});
+
 app.post('/api/crawler', async (req, res) => {
     const { email, password, dateFrom, dateTo } = req.body;
 
     if (!email || !password) {
         return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
     }
+
+    crawlerStatus = {
+        estado: 'Iniciando extração',
+        encomendasLidas: 0,
+        totalEncomendas: 0,
+        erro: null
+    };
 
     console.log(`Iniciando crawler para o usuário: ${email}`);
 
@@ -81,6 +99,8 @@ app.post('/api/crawler', async (req, res) => {
              // Em vez de dar erro (throw new Error), prosseguimos para retornar um array vazio [].
         }
 
+        crawlerStatus.totalEncomendas = linksEncomendas.length;
+        crawlerStatus.estado = 'Em processamento';
 
         for (let encomendaInfo of linksEncomendas) {
             const { text, href } = encomendaInfo;
@@ -139,6 +159,7 @@ app.post('/api/crawler', async (req, res) => {
                 listaCompleta: listaNomes.join(' | '),
                 produtosDetalhes: produtosEncontrados // Para o cálculo do Top 20
             });
+            crawlerStatus.encomendasLidas++;
         }
 
         // Append to existing file or create new
@@ -166,11 +187,14 @@ app.post('/api/crawler', async (req, res) => {
         // Save to file for caching/historical record
         fs.writeFileSync(jsonPath, JSON.stringify(historico, null, 2), 'utf-8');
 
+        crawlerStatus.estado = 'Concluído';
         console.log('Extração concluída com sucesso!');
         res.json({ success: true, data: historico });
 
     } catch (error) {
         console.error('Erro durante a execução do crawler:', error);
+        crawlerStatus.estado = 'Erros encontrados';
+        crawlerStatus.erro = error.message || 'Erro interno no servidor';
         res.status(500).json({ success: false, error: error.message || 'Erro interno no servidor' });
     } finally {
         if (browser) {
@@ -241,13 +265,14 @@ app.post('/api/corrigir-json', (req, res) => {
 app.get('/api/top-produtos', (req, res) => {
     const jsonPath = path.join(__dirname, 'dados_encomendas.json');
     if (!fs.existsSync(jsonPath)) {
-        return res.json({ success: true, data: [] });
+        return res.json({ success: true, topUnidades: [], topPesos: [] });
     }
 
     try {
         const fileData = fs.readFileSync(jsonPath, 'utf-8');
         const historico = JSON.parse(fileData);
-        const contagemProdutos = {};
+        const contagemUnidades = {};
+        const contagemPesos = {};
 
         historico.forEach(encomenda => {
             if (encomenda.produtosDetalhes) {
@@ -258,21 +283,36 @@ app.get('/api/top-produtos', (req, res) => {
                     const qtdMatch = prod.quantidadeTexto.match(/[\d.]+/);
                     const qtd = qtdMatch ? parseFloat(qtdMatch[0]) : 1;
 
-                    if (!contagemProdutos[nome]) {
-                        contagemProdutos[nome] = 0;
+                    const isKg = prod.quantidadeTexto.toLowerCase().includes('kg');
+
+                    if (isKg) {
+                        if (!contagemPesos[nome]) {
+                            contagemPesos[nome] = 0;
+                        }
+                        contagemPesos[nome] += qtd;
+                    } else {
+                        if (!contagemUnidades[nome]) {
+                            contagemUnidades[nome] = 0;
+                        }
+                        contagemUnidades[nome] += qtd;
                     }
-                    contagemProdutos[nome] += qtd;
                 });
             }
         });
 
-        // Converte o objeto em um array, ordena e pega o top 20
-        const topProdutos = Object.keys(contagemProdutos)
-            .map(nome => ({ nome, quantidadeTotal: contagemProdutos[nome] }))
+        // Converte o objeto em um array, ordena e pega o top 20 para unidades
+        const topUnidades = Object.keys(contagemUnidades)
+            .map(nome => ({ nome, quantidadeTotal: contagemUnidades[nome] }))
             .sort((a, b) => b.quantidadeTotal - a.quantidadeTotal)
             .slice(0, 20);
 
-        res.json({ success: true, data: topProdutos });
+        // Converte o objeto em um array, ordena e pega o top 20 para pesos
+        const topPesos = Object.keys(contagemPesos)
+            .map(nome => ({ nome, quantidadeTotal: contagemPesos[nome] }))
+            .sort((a, b) => b.quantidadeTotal - a.quantidadeTotal)
+            .slice(0, 20);
+
+        res.json({ success: true, topUnidades, topPesos });
     } catch (error) {
         console.error('Erro ao calcular top produtos:', error);
         res.status(500).json({ success: false, error: 'Erro ao calcular top produtos.' });

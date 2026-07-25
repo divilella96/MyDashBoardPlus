@@ -20,12 +20,25 @@
         </div>
         <div style="display: flex; gap: 10px;">
           <button class="btn-primary btn-add" id="btnCrawler" onclick="rodarCrawler()" style="flex: 1;">Extrair Dados</button>
-          <button class="btn-secondary" id="btnTop20" onclick="verTop20()" style="flex: 1;">Ver Top 20 Produtos</button>
+          <button class="btn-secondary" id="btnTop20Unidades" onclick="verTop20('unidades')" style="flex: 1;">Top 20 (Unidades)</button>
+          <button class="btn-secondary" id="btnTop20Pesos" onclick="verTop20('pesos')" style="flex: 1;">Top 20 (Pesos)</button>
           <button class="btn-secondary" id="btnCorrigirJson" onclick="corrigirJson()" style="flex: 1;" title="Limpar quantidades e remover duplicados">Corrigir JSON</button>
         </div>
       </div>
-      <div id="statusCrawler" aria-live="polite" style="font-size: 0.9rem; margin-bottom: 10px; min-height: 20px;"></div>
-      <pre id="resultadoCrawler" style="background: #f4f4f4; padding: 10px; border-radius: 4px; font-size: 0.8rem; overflow-x: auto; display: none;"></pre>
+
+      <!-- Painel de Status -->
+      <div id="painelStatus" aria-live="polite" style="display: none; background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #ddd;">
+        <h3 style="margin-top: 0; color: #333; font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 5px;">Status da Extração</h3>
+        <div style="margin-bottom: 8px;">
+            <strong>Estado:</strong> <span id="statusEstado" style="color: #007bff;">Iniciando...</span>
+        </div>
+        <div style="margin-bottom: 8px;">
+            <strong>Progresso:</strong> <span id="statusProgresso">0 / 0 encomendas processadas</span>
+        </div>
+        <div id="statusErroContainer" style="display: none; margin-top: 10px; padding: 10px; background: #ffe6e6; border-left: 4px solid #dc3545; color: #a94442;">
+            <strong>Erro:</strong> <span id="statusErroMensagem"></span>
+        </div>
+      </div>
 
       <h2>Geral</h2>
       <div class="order-input-group">
@@ -53,7 +66,7 @@
   <div id="top20Modal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 style="margin: 0; color: var(--primary-color);">Top 20 Produtos</h2>
+        <h2 id="tituloModalTop20" style="margin: 0; color: var(--primary-color);">Top 20 Produtos</h2>
         <button class="btn-close" onclick="fecharModal()">&times;</button>
       </div>
       <div class="modal-body">
@@ -183,25 +196,75 @@
       window.open(url.toString(), "_blank");
     }
 
+    let intervalId;
+
+    function atualizarPainelStatus(status) {
+      const painel = document.getElementById('painelStatus');
+      const estado = document.getElementById('statusEstado');
+      const progresso = document.getElementById('statusProgresso');
+      const erroContainer = document.getElementById('statusErroContainer');
+      const erroMensagem = document.getElementById('statusErroMensagem');
+
+      painel.style.display = 'block';
+      estado.textContent = status.estado;
+      progresso.textContent = `${status.encomendasLidas} / ${status.totalEncomendas} encomendas processadas`;
+
+      if (status.estado === 'Concluído') {
+         estado.style.color = '#28a745';
+      } else if (status.estado === 'Erros encontrados') {
+         estado.style.color = '#dc3545';
+      } else {
+         estado.style.color = '#007bff';
+      }
+
+      if (status.erro) {
+         erroContainer.style.display = 'block';
+         erroMensagem.textContent = status.erro;
+      } else {
+         erroContainer.style.display = 'none';
+      }
+    }
+
+    async function iniciarPollingStatus() {
+       intervalId = setInterval(async () => {
+          try {
+             const res = await fetch('http://localhost:3000/api/crawler-status');
+             if (res.ok) {
+                const status = await res.json();
+                atualizarPainelStatus(status);
+
+                if (status.estado === 'Concluído' || status.estado === 'Erros encontrados' || status.estado === 'Inativo') {
+                   clearInterval(intervalId);
+                }
+             }
+          } catch(e) {
+             console.error("Erro ao fazer polling do status", e);
+             clearInterval(intervalId);
+          }
+       }, 1000);
+    }
+
     async function rodarCrawler() {
       const email = document.getElementById('lyzerEmail').value.trim();
       const password = document.getElementById('lyzerPassword').value.trim();
       const dateFrom = document.getElementById('lyzerDateFrom').value;
       const dateTo = document.getElementById('lyzerDateTo').value;
-      const statusEl = document.getElementById('statusCrawler');
-      const resultadoEl = document.getElementById('resultadoCrawler');
       const btnCrawler = document.getElementById('btnCrawler');
+      const painel = document.getElementById('painelStatus');
+      const erroContainer = document.getElementById('statusErroContainer');
+      const erroMensagem = document.getElementById('statusErroMensagem');
 
       if (!email || !password) {
-        statusEl.textContent = 'Por favor, preencha o e-mail e a senha.';
-        statusEl.style.color = '#dc3545';
+        painel.style.display = 'block';
+        erroContainer.style.display = 'block';
+        erroMensagem.textContent = 'Por favor, preencha o e-mail e a senha.';
+        document.getElementById('statusEstado').textContent = 'Erro';
+        document.getElementById('statusEstado').style.color = '#dc3545';
         return;
       }
 
-      statusEl.textContent = 'Iniciando extração... (isso pode levar alguns segundos)';
-      statusEl.style.color = '#007bff';
-      resultadoEl.style.display = 'none';
       btnCrawler.disabled = true;
+      iniciarPollingStatus();
 
       try {
         const response = await fetch('http://localhost:3000/api/crawler', {
@@ -214,31 +277,27 @@
 
         const data = await response.json();
 
-        if (response.ok) {
-          statusEl.textContent = 'Extração concluída com sucesso!';
-          statusEl.style.color = '#28a745';
-          resultadoEl.textContent = JSON.stringify(data.data, null, 2);
-          resultadoEl.style.display = 'block';
-        } else {
-          statusEl.textContent = 'Erro: ' + (data.error || 'Falha na extração');
-          statusEl.style.color = '#dc3545';
-        }
       } catch (error) {
-        statusEl.textContent = 'Erro de conexão com o servidor local. O server.js está rodando?';
-        statusEl.style.color = '#dc3545';
+         // O polling lidará com falhas que não retornam do servidor mas se a chamada falhar de imediato
+         clearInterval(intervalId);
+         atualizarPainelStatus({ estado: 'Erros encontrados', encomendasLidas: 0, totalEncomendas: 0, erro: 'Erro de conexão com o servidor local. O server.js está rodando?'});
       } finally {
         btnCrawler.disabled = false;
       }
     }
 
     async function corrigirJson() {
-      const statusEl = document.getElementById('statusCrawler');
-      const resultadoEl = document.getElementById('resultadoCrawler');
+      const painel = document.getElementById('painelStatus');
+      const estado = document.getElementById('statusEstado');
+      const progresso = document.getElementById('statusProgresso');
+      const erroContainer = document.getElementById('statusErroContainer');
       const btnCorrigirJson = document.getElementById('btnCorrigirJson');
 
-      statusEl.textContent = 'A corrigir JSON...';
-      statusEl.style.color = '#007bff';
-      resultadoEl.style.display = 'none';
+      painel.style.display = 'block';
+      estado.textContent = 'A corrigir JSON...';
+      estado.style.color = '#007bff';
+      progresso.textContent = '-';
+      erroContainer.style.display = 'none';
       btnCorrigirJson.disabled = true;
 
       try {
@@ -248,44 +307,71 @@
         const data = await response.json();
 
         if (response.ok) {
-          statusEl.textContent = data.message || 'JSON corrigido com sucesso!';
-          statusEl.style.color = '#28a745';
+          estado.textContent = data.message || 'JSON corrigido com sucesso!';
+          estado.style.color = '#28a745';
         } else {
-          statusEl.textContent = 'Erro: ' + (data.error || 'Falha ao corrigir JSON');
-          statusEl.style.color = '#dc3545';
+          estado.textContent = 'Erros encontrados';
+          estado.style.color = '#dc3545';
+          erroContainer.style.display = 'block';
+          document.getElementById('statusErroMensagem').textContent = data.error || 'Falha ao corrigir JSON';
         }
       } catch (error) {
-        statusEl.textContent = 'Erro de conexão com o servidor local. O server.js está rodando?';
-        statusEl.style.color = '#dc3545';
+        estado.textContent = 'Erros encontrados';
+        estado.style.color = '#dc3545';
+        erroContainer.style.display = 'block';
+        document.getElementById('statusErroMensagem').textContent = 'Erro de conexão com o servidor local. O server.js está rodando?';
       } finally {
         btnCorrigirJson.disabled = false;
       }
     }
 
-    async function verTop20() {
-      const statusEl = document.getElementById('statusCrawler');
+    async function verTop20(tipo) {
+      const painel = document.getElementById('painelStatus');
+      const estado = document.getElementById('statusEstado');
+      const erroContainer = document.getElementById('statusErroContainer');
+      const progresso = document.getElementById('statusProgresso');
+
       const listaProdutos = document.getElementById('listaTopProdutos');
       const modal = document.getElementById('top20Modal');
-      const resultadoEl = document.getElementById('resultadoCrawler');
-      const btnTop20 = document.getElementById('btnTop20');
+      const tituloModal = document.getElementById('tituloModalTop20');
 
-      statusEl.textContent = 'Carregando ranking...';
-      statusEl.style.color = '#007bff';
-      resultadoEl.style.display = 'none';
-      btnTop20.disabled = true;
+      const btnTop20Unidades = document.getElementById('btnTop20Unidades');
+      const btnTop20Pesos = document.getElementById('btnTop20Pesos');
+
+      painel.style.display = 'block';
+      estado.textContent = 'Carregando ranking...';
+      estado.style.color = '#007bff';
+      progresso.textContent = '-';
+      erroContainer.style.display = 'none';
+
+      btnTop20Unidades.disabled = true;
+      btnTop20Pesos.disabled = true;
 
       try {
         const response = await fetch('http://localhost:3000/api/top-produtos');
         const data = await response.json();
 
         if (response.ok) {
-          statusEl.textContent = '';
+          estado.textContent = 'Ranking carregado.';
           listaProdutos.innerHTML = '';
 
-          if (data.data.length === 0) {
-            listaProdutos.innerHTML = '<li style="text-align: center; color: #666;">Nenhum produto encontrado no histórico.</li>';
+          let produtosLista = [];
+          let unidadeTexto = '';
+
+          if (tipo === 'pesos') {
+             tituloModal.textContent = 'Top 20 Produtos (Pesos)';
+             produtosLista = data.topPesos;
+             unidadeTexto = ' kg';
           } else {
-            data.data.forEach((prod, index) => {
+             tituloModal.textContent = 'Top 20 Produtos (Unidades)';
+             produtosLista = data.topUnidades;
+             unidadeTexto = ' unid.';
+          }
+
+          if (!produtosLista || produtosLista.length === 0) {
+            listaProdutos.innerHTML = '<li style="text-align: center; color: #666;">Nenhum produto encontrado no histórico para esta categoria.</li>';
+          } else {
+            produtosLista.forEach((prod, index) => {
               const li = document.createElement('li');
               const posicao = index + 1;
 
@@ -296,10 +382,12 @@
               else rankClass = 'rank-other';
 
               li.className = rankClass;
+              // formata para duas casas decimais se não for numero inteiro
+              const qtdFormatada = Number.isInteger(prod.quantidadeTotal) ? prod.quantidadeTotal : prod.quantidadeTotal.toFixed(2);
               li.innerHTML = `
                 <span class="rank-position">${posicao}º</span>
                 <span class="product-name">${prod.nome}</span>
-                <span class="product-qty">${prod.quantidadeTotal} unid.</span>
+                <span class="product-qty">${qtdFormatada}${unidadeTexto}</span>
               `;
               listaProdutos.appendChild(li);
             });
@@ -308,14 +396,19 @@
           modal.classList.add('active');
 
         } else {
-          statusEl.textContent = 'Erro: ' + (data.error || 'Falha ao buscar top produtos');
-          statusEl.style.color = '#dc3545';
+          estado.textContent = 'Erros encontrados';
+          estado.style.color = '#dc3545';
+          erroContainer.style.display = 'block';
+          document.getElementById('statusErroMensagem').textContent = data.error || 'Falha ao buscar top produtos';
         }
       } catch (error) {
-        statusEl.textContent = 'Erro de conexão com o servidor local. O server.js está rodando?';
-        statusEl.style.color = '#dc3545';
+        estado.textContent = 'Erros encontrados';
+        estado.style.color = '#dc3545';
+        erroContainer.style.display = 'block';
+        document.getElementById('statusErroMensagem').textContent = 'Erro de conexão com o servidor local. O server.js está rodando?';
       } finally {
-        btnTop20.disabled = false;
+        btnTop20Unidades.disabled = false;
+        btnTop20Pesos.disabled = false;
       }
     }
   </script>
