@@ -38,7 +38,8 @@
 
     <form onsubmit="return false;">
       <label for="phones">Números de Telefone</label>
-      <textarea id="phones" placeholder="Insira os números de telefone (separados por vírgula ou nova linha). Ex: 912345678, 961234567"></textarea>
+      <textarea id="phones" placeholder="Insira os números de telefone (separados por vírgula ou nova linha). Ex: 912345678, 961234567" aria-describedby="erro-telefones" aria-invalid="false"></textarea>
+      <small id="erro-telefones" style="color:red; display:none;" aria-live="polite"></small>
 
       <label for="time">Hora Prevista de Entrega</label>
       <input type="time" id="time" value="13:30">
@@ -54,16 +55,25 @@
 
   <script>
     function showOptions() {
-      const phonesInput = document.getElementById('phones').value;
+      const phonesEl = document.getElementById('phones');
+      const phonesInput = phonesEl.value;
       const timeInput = document.getElementById('time').value;
       const resultsDiv = document.getElementById('results');
       const linksList = document.getElementById('linksList');
+      const erroTelefones = document.getElementById('erro-telefones');
+
+      // Reset errors
+      erroTelefones.style.display = 'none';
+      phonesEl.setAttribute('aria-invalid', 'false');
 
       // Clear previous results
       linksList.innerHTML = '';
 
       if (!phonesInput.trim()) {
-        alert("Por favor, insira pelo menos um número de telefone.");
+        erroTelefones.textContent = "Por favor, insira pelo menos um número de telefone.";
+        erroTelefones.style.display = 'block';
+        phonesEl.setAttribute('aria-invalid', 'true');
+        phonesEl.focus();
         return;
       }
 
@@ -72,7 +82,10 @@
       const phones = phonesInput.split(/[\n,;]+/).map(p => p.trim()).filter(p => p !== '');
 
       if (phones.length === 0) {
-        alert("Nenhum número válido encontrado.");
+        erroTelefones.textContent = "Nenhum número válido encontrado.";
+        erroTelefones.style.display = 'block';
+        phonesEl.setAttribute('aria-invalid', 'true');
+        phonesEl.focus();
         return;
       }
 
