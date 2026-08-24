@@ -65,8 +65,7 @@ app.post('/api/crawler', async (req, res) => {
 
         if (targetDate) {
             // O Playwright (Node) fará o encode dos colchetes para %5B e %5D, e dois pontos para %3A
-            urlObj.searchParams.append('dateRange[from]', `${targetDate}T00:00:00.000Z`);
-            urlObj.searchParams.append('dateRange[to]', `${targetDate}T23:59:59.999Z`);
+            urlObj.searchParams.append('dateRange[from]', `${targetDate}T23:59:59.999Z`);
         }
 
         urlObj.searchParams.append('pageIndex', '1');
