@@ -270,6 +270,13 @@
     let dadosBrutos = [];
     let dadosFiltrados = [];
 
+    function getApiBaseUrl() {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') {
+        return 'http://localhost:3030';
+      }
+      return 'https://perform.lyzer.tech';
+    }
+
     // Formata a data para input YYYY-MM-DD localmente
     function getLocalYYYYMMDD(date) {
         if (!date) return '';
@@ -280,7 +287,7 @@
 
     async function buscarDados() {
         try {
-            const response = await fetch('/api/dados-dashboard');
+            const response = await fetch(`${getApiBaseUrl()}/api/dados-dashboard`);
             if (response.ok) {
                 const res = await response.json();
                 dadosBrutos = res.data || [];

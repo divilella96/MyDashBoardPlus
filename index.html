@@ -80,6 +80,14 @@
   </div>
 
   <script>
+
+    function getApiBaseUrl() {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') {
+        return 'http://localhost:3030';
+      }
+      return 'https://perform.lyzer.tech'; // Placeholder para url remota
+    }
+
     function fecharModal() {
       document.getElementById('top20Modal').classList.remove('active');
     }
@@ -238,7 +246,7 @@
     async function iniciarPollingStatus() {
        intervalId = setInterval(async () => {
           try {
-             const res = await fetch('http://localhost:3000/api/crawler-status');
+             const res = await fetch(`${getApiBaseUrl()}/api/crawler-status`);
              if (res.ok) {
                 const status = await res.json();
                 atualizarPainelStatus(status);
@@ -276,7 +284,7 @@
       iniciarPollingStatus();
 
       try {
-        const response = await fetch('http://localhost:3000/api/crawler', {
+        const response = await fetch(`${getApiBaseUrl()}/api/crawler`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -310,7 +318,7 @@
       btnCorrigirJson.disabled = true;
 
       try {
-        const response = await fetch('http://localhost:3000/api/corrigir-json', {
+        const response = await fetch(`${getApiBaseUrl()}/api/corrigir-json`, {
           method: 'POST'
         });
         const data = await response.json();
@@ -357,7 +365,7 @@
       btnTop20Pesos.disabled = true;
 
       try {
-        const response = await fetch('http://localhost:3000/api/top-produtos');
+        const response = await fetch(`${getApiBaseUrl()}/api/top-produtos`);
         const data = await response.json();
 
         if (response.ok) {
