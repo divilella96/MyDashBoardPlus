@@ -22,7 +22,7 @@ app.get('/api/crawler-status', (req, res) => {
 });
 
 app.post('/api/crawler', async (req, res) => {
-    const { email, password, dateFrom, dateTo } = req.body;
+    const { email, password, targetDate } = req.body;
 
     if (!email || !password) {
         return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
@@ -63,12 +63,10 @@ app.post('/api/crawler', async (req, res) => {
         const urlObj = new URL('https://perform.lyzer.tech/pt/app/retail/orders');
         urlObj.searchParams.append('dateSearchFor', 'deadline');
 
-        if (dateFrom) {
+        if (targetDate) {
             // O Playwright (Node) fará o encode dos colchetes para %5B e %5D, e dois pontos para %3A
-            urlObj.searchParams.append('dateRange[from]', `${dateFrom}T00:00:00.000Z`);
-        }
-        if (dateTo) {
-            urlObj.searchParams.append('dateRange[to]', `${dateTo}T23:59:59.999Z`);
+            urlObj.searchParams.append('dateRange[from]', `${targetDate}T00:00:00.000Z`);
+            urlObj.searchParams.append('dateRange[to]', `${targetDate}T23:59:59.999Z`);
         }
 
         urlObj.searchParams.append('pageIndex', '1');
@@ -158,7 +156,7 @@ app.post('/api/crawler', async (req, res) => {
                 quantidadeTotal: totalItens,
                 listaCompleta: listaNomes.join(' | '),
                 produtosDetalhes: produtosEncontrados, // Para o cálculo do Top 20
-                dataCaptura: new Date().toISOString()
+                dataCaptura: targetDate ? `${targetDate}T12:00:00.000Z` : new Date().toISOString()
             });
             crawlerStatus.encomendasLidas++;
         }
