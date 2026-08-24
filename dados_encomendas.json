@@ -1,0 +1,53 @@
+[
+  {
+    "encomenda": "NO-DATE",
+    "link": "https://ex.com/nd",
+    "listaCompleta": "Velho (5)",
+    "produtosDetalhes": [
+      {
+        "nome": "Velho",
+        "quantidadeTexto": "5"
+      }
+    ]
+  },
+  {
+    "encomenda": "HOJE-1",
+    "link": "https://ex.com/h1",
+    "listaCompleta": "Melancia (5) | Saco (5)",
+    "produtosDetalhes": [
+      {
+        "nome": "Melancia",
+        "quantidadeTexto": "5"
+      },
+      {
+        "nome": "Saco",
+        "quantidadeTexto": "5"
+      }
+    ],
+    "dataCaptura": "2026-08-24T08:56:23.106Z"
+  },
+  {
+    "encomenda": "HOJE-2",
+    "link": "https://ex.com/h2",
+    "listaCompleta": "Batata (2/5 kg)",
+    "produtosDetalhes": [
+      {
+        "nome": "Batata",
+        "quantidadeTexto": "5 kg"
+      }
+    ],
+    "dataCaptura": "2026-08-24T08:56:23.106Z"
+  },
+  {
+    "encomenda": "ONTEM-1",
+    "link": "https://ex.com/o1",
+    "listaCompleta": "Melancia (10)",
+    "produtosDetalhes": [
+      {
+        "nome": "Melancia",
+        "quantidadeTexto": "10"
+      }
+    ],
+    "dataCaptura": "2026-08-23T08:56:23.106Z"
+  }
+]
