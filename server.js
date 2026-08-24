@@ -157,7 +157,8 @@ app.post('/api/crawler', async (req, res) => {
                 produtosDiferentes: produtosEncontrados.length,
                 quantidadeTotal: totalItens,
                 listaCompleta: listaNomes.join(' | '),
-                produtosDetalhes: produtosEncontrados // Para o cálculo do Top 20
+                produtosDetalhes: produtosEncontrados, // Para o cálculo do Top 20
+                dataCaptura: new Date().toISOString()
             });
             crawlerStatus.encomendasLidas++;
         }
@@ -316,6 +317,54 @@ app.get('/api/top-produtos', (req, res) => {
     } catch (error) {
         console.error('Erro ao calcular top produtos:', error);
         res.status(500).json({ success: false, error: 'Erro ao calcular top produtos.' });
+    }
+});
+
+
+app.get('/api/dados-dashboard', (req, res) => {
+    const jsonPath = path.join(__dirname, 'dados_encomendas.json');
+    if (!fs.existsSync(jsonPath)) {
+        return res.json({ success: true, data: [] });
+    }
+
+    try {
+        const fileData = fs.readFileSync(jsonPath, 'utf-8');
+        const historico = JSON.parse(fileData);
+        const dataConsolidada = [];
+
+        historico.forEach(encomenda => {
+            if (encomenda.produtosDetalhes) {
+                encomenda.produtosDetalhes.forEach(prod => {
+                    let qtyText = prod.quantidadeTexto || '0';
+                    let isKg = qtyText.toLowerCase().includes('kg');
+
+                    // Tratamento de quantidade 5/7 -> 7
+                    if (qtyText.includes('/')) {
+                        const parts = qtyText.split('/');
+                        qtyText = parts[parts.length - 1].trim();
+                    }
+
+                    // Extrair apenas o número
+                    const qtdMatch = qtyText.match(/[\d.]+/);
+                    const qtd = qtdMatch ? parseFloat(qtdMatch[0]) : 1;
+
+                    dataConsolidada.push({
+                        encomenda: encomenda.encomenda,
+                        link: encomenda.link,
+                        dataCaptura: encomenda.dataCaptura || null,
+                        produto: prod.nome,
+                        quantidade: qtd,
+                        unidade: isKg ? 'kg' : 'unidade',
+                        origem: 'Lyzer'
+                    });
+                });
+            }
+        });
+
+        res.json({ success: true, data: dataConsolidada });
+    } catch (error) {
+        console.error('Erro ao processar dados para o dashboard:', error);
+        res.status(500).json({ success: false, error: 'Erro interno ao processar os dados' });
     }
 });
 
