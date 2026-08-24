@@ -329,7 +329,12 @@ app.get('/api/dados-dashboard', (req, res) => {
         const historico = JSON.parse(fileData);
         const dataConsolidada = [];
 
-        historico.forEach(encomenda => {
+        // Deduplication using link as primary key (keeping the latest occurrence)
+        const uniqueHistoricoMap = new Map();
+        historico.forEach(enc => uniqueHistoricoMap.set(enc.link, enc));
+        const deduplicatedHistorico = Array.from(uniqueHistoricoMap.values());
+
+        deduplicatedHistorico.forEach(encomenda => {
             if (encomenda.produtosDetalhes) {
                 encomenda.produtosDetalhes.forEach(prod => {
                     let qtyText = prod.quantidadeTexto || '0';
