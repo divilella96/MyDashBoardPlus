@@ -32,10 +32,7 @@ const DATA_FIM = '';    // ex: '2026-07-22'
         urlObj.searchParams.append('dateSearchFor', 'deadline');
 
         if (DATA_INICIO) {
-            urlObj.searchParams.append('dateRange[from]', `${DATA_INICIO}T00:00:00.000Z`);
-        }
-        if (DATA_FIM) {
-            urlObj.searchParams.append('dateRange[to]', `${DATA_FIM}T23:59:59.999Z`);
+            urlObj.searchParams.append('dateRange[from]', `${DATA_INICIO}T23:59:59.999Z`);
         }
 
         urlObj.searchParams.append('pageIndex', '1');

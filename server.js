@@ -65,8 +65,7 @@ app.post('/api/crawler', async (req, res) => {
 
         if (targetDate) {
             // O Playwright (Node) fará o encode dos colchetes para %5B e %5D, e dois pontos para %3A
-            urlObj.searchParams.append('dateRange[from]', `${targetDate}T00:00:00.000Z`);
-            urlObj.searchParams.append('dateRange[to]', `${targetDate}T23:59:59.999Z`);
+            urlObj.searchParams.append('dateRange[from]', `${targetDate}T23:59:59.999Z`);
         }
 
         urlObj.searchParams.append('pageIndex', '1');
@@ -330,7 +329,12 @@ app.get('/api/dados-dashboard', (req, res) => {
         const historico = JSON.parse(fileData);
         const dataConsolidada = [];
 
-        historico.forEach(encomenda => {
+        // Deduplication using link as primary key (keeping the latest occurrence)
+        const uniqueHistoricoMap = new Map();
+        historico.forEach(enc => uniqueHistoricoMap.set(enc.link, enc));
+        const deduplicatedHistorico = Array.from(uniqueHistoricoMap.values());
+
+        deduplicatedHistorico.forEach(encomenda => {
             if (encomenda.produtosDetalhes) {
                 encomenda.produtosDetalhes.forEach(prod => {
                     let qtyText = prod.quantidadeTexto || '0';
