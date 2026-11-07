@@ -53,10 +53,8 @@
       <button class="btn-primary" onclick="abrirMensagemWhatsApp()">Report Bloqueio POS</button>
       <button class="btn-primary" onclick="abrirPaginaContato()">E-mail Artigo Esquecido</button>
 
-      <h2>Rato</h2>
-      <button class="btn-primary" onclick="abrirLiveOperationsRato()">Rato - Em Direto</button>
-      <button class="btn-primary" onclick="abrirRotaRato()">ROTA Rato</button>
       <h2>São Bento</h2>
+      <button class="btn-primary" onclick="abrirOrderManagementSaoBento()">São Bento - Encomendas e C&C</button>
       <button class="btn-primary" onclick="abrirLiveOperationsSaoBento()">São Bento - Em Direto</button>
       <button class="btn-primary" onclick="abrirRotaSaoBento()">ROTA São Bento</button>
     </div>
@@ -129,6 +127,18 @@
       return [...getStatusList(),"Cancelled","ManualAssignment"];
     }
 
+    function abrirOrderManagementSaoBento() {
+      const agora = getLocalISOString(new Date());
+      const url = new URL("https://perform.lyzer.tech/pt/app/operations/order-management");
+      url.searchParams.append("dateRange[from]", agora);
+      url.searchParams.append("stores", "244");
+      const statuses = ["Pending", "InAssignment", "Open", "Invoicing", "Processing", "Complete", "InTransit", "Incidence"];
+      statuses.forEach(status => url.searchParams.append("status", status));
+      url.searchParams.append("pageIndex", "1");
+      url.searchParams.append("pageSize", "50");
+      window.open(url.toString(), "_blank");
+    }
+
     function abrirLiveOperationsSaoBento() {
       const agoraLocal = getLocalISOString(new Date());
       const agoraUTC = new Date().toISOString();
@@ -149,19 +159,6 @@
       window.open(url.toString(), "_blank");
     }
 
-    function abrirLiveOperationsRato() {
-      const agora = getLocalISOString(new Date());
-      const url = new URL("https://perform.lyzer.tech/pt/app/operations/live-operations");
-      url.searchParams.append("deliveryDeadline", agora);
-      url.searchParams.append("retailer", "29");
-      url.searchParams.append("store", "133");
-      url.searchParams.append("serviceType", "190");
-      getFullStatusList().forEach(status => url.searchParams.append("status", status));
-      url.searchParams.append("pageIndex", "1");
-      url.searchParams.append("pageSize", "20");
-      window.open(url.toString(), "_blank");
-    }
-
     function abrirMensagemWhatsApp() {
       window.open("mensagem.html", "_blank");
     }
@@ -170,23 +167,6 @@
       const offset = date.getTimezoneOffset();
       const dateWithOffset = new Date(date.getTime() - (offset * 60 * 1000));
       return dateWithOffset.toISOString().slice(0, -1);
-    }
-
-    function abrirRotaRato() {
-      // Format current date as YYYY-MM-DDT00:00:00
-      const today = new Date();
-      const yyyy = today.getFullYear();
-      const mm = String(today.getMonth() + 1).padStart(2, '0');
-      const dd = String(today.getDate()).padStart(2, '0');
-      const dataAtual = `${yyyy}-${mm}-${dd}T00:00:00`;
-
-      const url = new URL("https://perform.lyzer.tech/pt/app/operations/routes");
-      url.searchParams.append("targetDate", dataAtual);
-      url.searchParams.append("stores", "133");
-      url.searchParams.append("storeServices", "190");
-      url.searchParams.append("pageIndex", "1");
-      url.searchParams.append("pageSize", "20");
-      window.open(url.toString(), "_blank");
     }
 
     function abrirRotaSaoBento() {
